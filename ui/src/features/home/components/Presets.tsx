@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type DragEvent } from 'react'
 import { Plus, ImagePlus, Check, X, Trash2, Pencil } from 'lucide-react'
 import { usePresetsStore, type Preset } from '../../../store/presetsStore'
 import { initials } from '../../../util'
@@ -43,6 +43,11 @@ export default function Presets() {
   const handlePickIcon = async () => {
     const result = await window.api.pickIconFile()
     if (result) setIconDraft(result.dataUrl)
+  }
+
+  const handleDragStart = (event: DragEvent<HTMLDivElement>, preset: Preset) => {
+    event.dataTransfer.effectAllowed = 'copy'
+    event.dataTransfer.setData('application/json', JSON.stringify(preset))
   }
 
   const handleSave = () => {
@@ -182,7 +187,9 @@ export default function Presets() {
       {presets.map((preset) => (
         <div
           key={preset.id}
-          className="flex items-center gap-3 overflow-hidden rounded-lg border border-green-200 bg-white px-3 py-2.5 dark:border-green-800 dark:bg-green-900/30"
+          draggable
+          onDragStart={(event) => handleDragStart(event, preset)}
+          className="flex cursor-grab items-center gap-3 overflow-hidden rounded-lg border border-green-200 bg-white px-3 py-2.5 active:cursor-grabbing dark:border-green-800 dark:bg-green-900/30"
         >
           {preset.iconDataUrl ? (
             <img src={preset.iconDataUrl} alt="" className="h-7 w-7 shrink-0 rounded object-cover" />

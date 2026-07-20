@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, type DragEvent } from 'react'
 import { ChevronDown, ChevronRight, Eye, EyeOff, Focus, Pencil, ImagePlus, Check, X } from 'lucide-react'
 import { useAppInstancesStore, type AppInstance } from '../../../store/appInstancesStore'
-import { usePresetsStore } from '../../../store/presetsStore'
+import { usePresetsStore, type Preset } from '../../../store/presetsStore'
 import { initials } from '../../../util'
 
 export default function AppInstanceRow({ instance }: { instance: AppInstance }) {
@@ -13,6 +13,7 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
   const [heightDraft, setHeightDraft] = useState('')
   const [xDraft, setXDraft] = useState('')
   const [yDraft, setYDraft] = useState('')
+  const [isDragOver, setIsDragOver] = useState(false)
 
   const handlePickIcon = async () => {
     const result = await window.api.pickIconFile()
@@ -58,8 +59,50 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
     })
   }
 
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+  }
+
+  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDragOver(false)
+
+    const raw = event.dataTransfer.getData('application/json')
+    if (!raw) return
+
+    let preset: Preset
+    try {
+      preset = JSON.parse(raw)
+    } catch {
+      return
+    }
+
+    saveEdit(instance.pid, preset.title, preset.iconDataUrl)
+    window.api.setWindowBounds(instance.pid, preset.x, preset.y, preset.width, preset.height)
+  }
+
   return (
-    <div className="overflow-hidden rounded-lg border border-green-200 bg-white dark:border-green-800 dark:bg-green-900/30">
+    <div
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`overflow-hidden rounded-lg border bg-white transition dark:bg-green-900/30 ${
+        isDragOver
+          ? 'border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
+          : 'border-green-200 dark:border-green-800'
+      }`}
+    >
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           type="button"
