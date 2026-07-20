@@ -19,24 +19,12 @@ import {
   type PresetGroup,
   type PresetItem,
 } from "../../../store/presetsStore";
-import { initials } from "../../../util";
+import { downloadJson, initials, parseWindowBoundsDraft } from "../../../util";
 import { DRAG_MIME_TYPES } from "../../../constants/drag.constant";
 import {
   PRESET_EXPORT_FILENAME,
   PRESET_GROUP_EXPORT_FILENAME_PREFIX,
 } from "../../../constants/preset.constant";
-
-function downloadJson(filename: string, data: unknown) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
-    type: DRAG_MIME_TYPES.PRESET_ITEM,
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
 
 export default function Presets() {
   const {
@@ -497,22 +485,16 @@ export default function Presets() {
     )
       return;
 
-    const width = Number(widthDraft);
-    const height = Number(heightDraft);
-    const x = Number(xDraft);
-    const y = Number(yDraft);
-    const hasValidBounds = [width, height, x, y].every((value) =>
-      Number.isFinite(value),
-    );
+    const bounds = parseWindowBoundsDraft(widthDraft, heightDraft, xDraft, yDraft);
 
     const values = {
       title: titleDraft.trim(),
       iconDataUrl: iconDraft,
       pid: parsedPid,
-      width: hasValidBounds ? width : 0,
-      height: hasValidBounds ? height : 0,
-      x: hasValidBounds ? x : 0,
-      y: hasValidBounds ? y : 0,
+      width: bounds?.width ?? 0,
+      height: bounds?.height ?? 0,
+      x: bounds?.x ?? 0,
+      y: bounds?.y ?? 0,
     };
 
     if (editingItemId) {

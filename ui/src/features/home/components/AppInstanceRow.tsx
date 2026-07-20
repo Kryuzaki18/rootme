@@ -7,6 +7,7 @@ import {
 import type { PresetItem } from "../../../store/presetsStore";
 import { DRAG_MIME_TYPES } from "../../../constants/drag.constant";
 import { PID_COPIED_RESET_MS } from "../../../constants/ui.constant";
+import { parseWindowBoundsDraft } from "../../../util";
 
 export default function AppInstanceRow({
   instance,
@@ -61,15 +62,9 @@ export default function AppInstanceRow({
     const title = nameDraft.trim();
     saveEdit(instance.pid, title, iconDraft);
 
-    const width = Number(widthDraft);
-    const height = Number(heightDraft);
-    const x = Number(xDraft);
-    const y = Number(yDraft);
-    const hasValidBounds = [width, height, x, y].every((value) =>
-      Number.isFinite(value),
-    );
-    if (hasValidBounds) {
-      window.api.setWindowBounds(instance.pid, x, y, width, height);
+    const bounds = parseWindowBoundsDraft(widthDraft, heightDraft, xDraft, yDraft);
+    if (bounds) {
+      window.api.setWindowBounds(instance.pid, bounds.x, bounds.y, bounds.width, bounds.height);
     }
   };
 
