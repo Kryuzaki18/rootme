@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Eye, EyeOff, Focus, Pencil, ImagePlus, Check, X } from 'lucide-react'
 import { useAppInstancesStore, type AppInstance } from '../../../store/appInstancesStore'
+import { usePresetsStore } from '../../../store/presetsStore'
 import { initials } from '../../../util'
 
 export default function AppInstanceRow({ instance }: { instance: AppInstance }) {
   const { toggleCollapse, toggleVisibility, focusInstance, toggleEdit, saveEdit } = useAppInstancesStore()
+  const savePreset = usePresetsStore((state) => state.savePreset)
   const [nameDraft, setNameDraft] = useState(instance.displayName)
   const [iconDraft, setIconDraft] = useState<string | undefined>(instance.iconDataUrl)
   const [widthDraft, setWidthDraft] = useState('')
@@ -34,15 +36,26 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
 
   const handleSave = () => {
     if (!nameDraft.trim()) return
-    saveEdit(instance.pid, nameDraft.trim(), iconDraft)
+    const title = nameDraft.trim()
+    saveEdit(instance.pid, title, iconDraft)
 
     const width = Number(widthDraft)
     const height = Number(heightDraft)
     const x = Number(xDraft)
     const y = Number(yDraft)
-    if ([width, height, x, y].every((value) => Number.isFinite(value))) {
+    const hasValidBounds = [width, height, x, y].every((value) => Number.isFinite(value))
+    if (hasValidBounds) {
       window.api.setWindowBounds(instance.pid, x, y, width, height)
     }
+
+    savePreset({
+      title,
+      iconDataUrl: iconDraft,
+      width: hasValidBounds ? width : 0,
+      height: hasValidBounds ? height : 0,
+      x: hasValidBounds ? x : 0,
+      y: hasValidBounds ? y : 0
+    })
   }
 
   return (

@@ -1,44 +1,58 @@
-import { useEffect, useState } from 'react'
-import { Moon, Sun } from 'lucide-react'
-import { APP_NAME, APP_TAGLINE } from '../../constants'
-import { STORAGE_KEYS } from '@/constants/storage.constant'
+import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { APP_NAME, APP_TAGLINE } from "../../constants";
+import { STORAGE_KEYS } from "@/constants/storage.constant";
 
-type Theme = 'light' | 'dark'
+type Theme = "light" | "dark";
 
 function getInitialTheme(): Theme {
-  const stored = localStorage.getItem(STORAGE_KEYS.THEME)
-  if (stored === 'light' || stored === 'dark') return stored
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  const stored = localStorage.getItem(STORAGE_KEYS.THEME);
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 export default function Header() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-    localStorage.setItem(STORAGE_KEYS.THEME, theme)
-  }, [theme])
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem(STORAGE_KEYS.THEME, theme);
+  }, [theme]);
 
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between border-b border-green-200 bg-green-100/90 px-6 py-4 backdrop-blur dark:border-green-900 dark:bg-gray-950/90">
       <div className="flex items-center gap-3">
-        <img src="/rootme-logo.png" alt={APP_NAME} className="h-9 w-9 rounded-lg object-contain" />
+        <img
+          src="/rootme-logo.png"
+          alt={APP_NAME}
+          className="h-9 w-9 rounded-lg object-contain"
+        />
         <div>
           <h1 className="text-lg font-semibold leading-tight text-green-900 dark:text-green-50">
             {APP_NAME}
           </h1>
-          <p className="text-xs text-green-700 dark:text-green-400">{APP_TAGLINE}</p>
+          <p className="text-xs text-green-700 dark:text-green-400">
+            {APP_TAGLINE}
+          </p>
         </div>
       </div>
 
       <button
         type="button"
-        onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-green-300 text-green-700 transition hover:bg-green-200 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900"
+        onClick={() =>
+          setTheme((current) => (current === "dark" ? "light" : "dark"))
+        }
+        className="flex h-9 w-9 items-center justify-center rounded-full  text-green-700 transition hover:bg-green-200  dark:text-green-300 dark:hover:bg-green-900"
         aria-label="Toggle theme"
       >
-        {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        {theme === "dark" ? (
+          <Sun className="h-5 w-5" />
+        ) : (
+          <Moon className="h-5 w-5" />
+        )}
       </button>
     </header>
-  )
+  );
 }
