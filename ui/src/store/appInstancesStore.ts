@@ -56,8 +56,6 @@ export const useAppInstancesStore = create<AppInstancesState>((set, get) => ({
     if (!instance) return
 
     const nextVisible = !instance.isVisible
-    // Showing must also bring the window to the foreground (e.g. when it's
-    // running minimized to the tray) — setWindowVisibility alone only restores it.
     const success = nextVisible
       ? await window.api.focusWindow(instance.pid)
       : await window.api.setWindowVisibility(instance.pid, false)

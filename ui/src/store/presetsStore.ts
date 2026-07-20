@@ -31,7 +31,6 @@ interface PresetsState {
 
 const STORAGE_KEY = 'rootme.presets'
 
-// Accepts either the current group format or a legacy flat preset list.
 function normalizeGroupsData(parsed: unknown): PresetGroup[] {
   if (!Array.isArray(parsed) || parsed.length === 0) return []
 

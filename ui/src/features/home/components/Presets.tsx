@@ -45,7 +45,9 @@ export default function Presets() {
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null)
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
-  const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(new Set())
+  const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(
+    () => new Set(groups.map((group) => group.id))
+  )
   const [focusedPids, setFocusedPids] = useState<Set<number>>(new Set())
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [titleDraft, setTitleDraft] = useState('')
@@ -194,8 +196,6 @@ export default function Presets() {
     event.preventDefault()
     event.stopPropagation()
 
-    // Only bind a PID to a preset that doesn't already have one, and never duplicate
-    // a PID that's already assigned to another preset in the same group.
     if (item.pid !== undefined) return
 
     let instance: { pid: number }
@@ -210,9 +210,6 @@ export default function Presets() {
     updateItemPid(groupId, item.id, instance.pid)
   }
 
-  // The underlying Win32 calls spawn a PowerShell process and can take a
-  // noticeable moment, so flip the UI immediately (optimistic update) and
-  // only revert it if the call turns out to have failed.
   const setPidsFocused = (pids: number[], focused: boolean) => {
     setFocusedPids((current) => {
       const next = new Set(current)
@@ -227,8 +224,6 @@ export default function Presets() {
     })
   }
 
-  // Focusing also moves the window back to the preset's configured position/size,
-  // not just showing it — the two calls are independent so they run concurrently.
   const focusItemAtPosition = (item: PresetItem & { pid: number }) =>
     Promise.all([
       window.api.focusWindow(item.pid),
