@@ -18,6 +18,7 @@ interface AppInstancesState {
   isLoading: boolean
   hasSearched: boolean
   verify: (title: string) => Promise<void>
+  clearSearch: () => void
   toggleVisibility: (pid: number) => Promise<void>
   focusInstance: (pid: number) => Promise<void>
   toggleEdit: (pid: number) => void
@@ -44,6 +45,10 @@ export const useAppInstancesStore = create<AppInstancesState>((set, get) => ({
     }))
 
     set({ instances, isLoading: false })
+  },
+
+  clearSearch: () => {
+    set({ instances: [], isLoading: false, hasSearched: false })
   },
 
   toggleVisibility: async (pid) => {

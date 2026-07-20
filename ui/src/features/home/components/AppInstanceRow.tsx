@@ -130,7 +130,7 @@ export default function AppInstanceRow({
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition active:cursor-grabbing dark:bg-green-900/30 ${
+      className={`row-enter shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition active:cursor-grabbing dark:bg-green-900/30 ${
         isDragOver
           ? "border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
           : "border-green-200 dark:border-green-800"

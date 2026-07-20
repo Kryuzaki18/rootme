@@ -2,15 +2,21 @@ import { useState } from 'react'
 import { Search, Loader2 } from 'lucide-react'
 import { useAppInstancesStore } from '../../store/appInstancesStore'
 import AppInstanceRow from './components/AppInstanceRow'
+import AppInstanceRowSkeleton from './components/AppInstanceRowSkeleton'
 import Presets from './components/Presets'
 
 export default function Home() {
   const [title, setTitle] = useState('')
-  const { instances, isLoading, hasSearched, verify } = useAppInstancesStore()
+  const { instances, isLoading, hasSearched, verify, clearSearch } = useAppInstancesStore()
 
   const handleVerify = () => {
     if (!title.trim() || isLoading) return
     verify(title.trim())
+  }
+
+  const handleClear = () => {
+    setTitle('')
+    clearSearch()
   }
 
   return (
@@ -36,6 +42,14 @@ export default function Home() {
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             Verify
           </button>
+          <button
+            type="button"
+            onClick={handleClear}
+            disabled={!title.trim() && !hasSearched}
+            className="cursor-pointer rounded-lg px-3 py-2.5 text-sm font-medium text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
+          >
+            Clear
+          </button>
         </div>
 
         {hasSearched && !isLoading && (
@@ -51,9 +65,9 @@ export default function Home() {
             </p>
           )}
 
-          {instances.map((instance) => (
-            <AppInstanceRow key={instance.pid} instance={instance} />
-          ))}
+          {isLoading
+            ? Array.from({ length: 7 }, (_, index) => <AppInstanceRowSkeleton key={index} />)
+            : instances.map((instance) => <AppInstanceRow key={instance.pid} instance={instance} />)}
         </section>
       </div>
     </main>
