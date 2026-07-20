@@ -16,5 +16,5 @@
       "@/*": ["./ui/src/*"]
     }
   },
-  "include": ["ui/src/**/*"]
+  "include": ["ui/src/**/*.ts", "ui/src/**/*.tsx"]
 }

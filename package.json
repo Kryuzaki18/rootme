@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
-  "author": "",
+  "author": "krystian john dumapit",
   "type": "commonjs",
   "main": "./out/main/index.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "electron-vite dev",
-    "build": "electron-vite build",
+    "build": "npm run typecheck && electron-vite build",
     "preview": "electron-vite preview",
-    "start": "electron-vite preview",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "build:win": "npm run build && electron-builder --win",
+    "build:dir": "npm run build && electron-builder --win --dir"
   },
   "dependencies": {
     "@nut-tree-fork/nut-js": "^4.2.6",
@@ -31,5 +35,31 @@
     "electron-vite": "^5.0.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
+  },
+  "build": {
+    "appId": "com.rootme.app",
+    "productName": "Rootme",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "**/node_modules/@nut-tree-fork/**"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "ui/public/rootme-logo.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
   }
 }

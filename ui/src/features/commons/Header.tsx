@@ -25,7 +25,7 @@ export default function Header() {
     <header className="sticky top-0 z-10 flex items-center justify-between border-b border-green-200 bg-green-50/30 px-6 py-4 backdrop-blur dark:border-green-900 dark:bg-gray-950/90">
       <div className="flex items-center gap-3">
         <img
-          src="/rootme-logo.png"
+          src="./rootme-logo.png"
           alt={APP_NAME}
           className="h-9 w-9 rounded-lg object-contain"
         />

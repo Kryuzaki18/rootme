@@ -11,6 +11,9 @@ import {
   setWindowBounds
 } from './processManager'
 
+app.disableHardwareAcceleration()
+app.commandLine.appendSwitch('no-sandbox')
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -81,7 +84,7 @@ function registerIpcHandlers(): void {
   })
 }
 
-app.whenReady().then(() => {
+void app.whenReady().then(() => {
   registerIpcHandlers()
   createWindow()
 
