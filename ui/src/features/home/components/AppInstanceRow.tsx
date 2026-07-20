@@ -4,7 +4,8 @@ import {
   useAppInstancesStore,
   type AppInstance,
 } from "../../../store/appInstancesStore";
-import { usePresetsStore, type PresetItem } from "../../../store/presetsStore";
+import type { PresetItem } from "../../../store/presetsStore";
+import { INSTANCE_DRAG_MIME } from "../../../util";
 
 export default function AppInstanceRow({
   instance,
@@ -98,13 +99,27 @@ export default function AppInstanceRow({
     );
   };
 
+  const handleInstanceDragStart = (event: DragEvent<HTMLDivElement>) => {
+    event.dataTransfer.effectAllowed = "copy";
+    event.dataTransfer.setData(
+      INSTANCE_DRAG_MIME,
+      JSON.stringify({
+        pid: instance.pid,
+        title: instance.windowTitle || instance.displayName,
+        iconDataUrl: instance.iconDataUrl,
+      }),
+    );
+  };
+
   return (
     <div
+      draggable
+      onDragStart={handleInstanceDragStart}
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`shrink-0 overflow-hidden rounded-lg border bg-white transition dark:bg-green-900/30 ${
+      className={`shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition active:cursor-grabbing dark:bg-green-900/30 ${
         isDragOver
           ? "border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
           : "border-green-200 dark:border-green-800"

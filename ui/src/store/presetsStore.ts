@@ -12,6 +12,7 @@ export interface PresetItem {
 
 export interface PresetGroup {
   id: string
+  title: string
   items: PresetItem[]
 }
 
@@ -19,6 +20,7 @@ interface PresetsState {
   groups: PresetGroup[]
   addGroup: () => string
   deleteGroup: (groupId: string) => void
+  renameGroup: (groupId: string, title: string) => void
   addItem: (groupId: string, item: Omit<PresetItem, 'id'>) => void
   updateItem: (groupId: string, itemId: string, item: Omit<PresetItem, 'id'>) => void
   deleteItem: (groupId: string, itemId: string) => void
@@ -32,10 +34,14 @@ function normalizeGroupsData(parsed: unknown): PresetGroup[] {
   if (!Array.isArray(parsed) || parsed.length === 0) return []
 
   if (!('items' in parsed[0])) {
-    return [{ id: crypto.randomUUID(), items: parsed as PresetItem[] }]
+    return [{ id: crypto.randomUUID(), title: '', items: parsed as PresetItem[] }]
   }
 
-  return parsed as PresetGroup[]
+  return (parsed as Array<{ id: string; title?: string; items: PresetItem[] }>).map((group) => ({
+    id: group.id,
+    title: group.title ?? '',
+    items: group.items
+  }))
 }
 
 function loadGroups(): PresetGroup[] {
@@ -57,7 +63,7 @@ export const usePresetsStore = create<PresetsState>((set, get) => ({
 
   addGroup: () => {
     const id = crypto.randomUUID()
-    const groups = [...get().groups, { id, items: [] }]
+    const groups = [...get().groups, { id, title: '', items: [] }]
     persistGroups(groups)
     set({ groups })
     return id
@@ -65,6 +71,12 @@ export const usePresetsStore = create<PresetsState>((set, get) => ({
 
   deleteGroup: (groupId) => {
     const groups = get().groups.filter((group) => group.id !== groupId)
+    persistGroups(groups)
+    set({ groups })
+  },
+
+  renameGroup: (groupId, title) => {
+    const groups = get().groups.map((group) => (group.id === groupId ? { ...group, title } : group))
     persistGroups(groups)
     set({ groups })
   },
@@ -98,6 +110,7 @@ export const usePresetsStore = create<PresetsState>((set, get) => ({
   importGroups: (data) => {
     const imported = normalizeGroupsData(data).map((group) => ({
       id: crypto.randomUUID(),
+      title: group.title,
       items: group.items.map((item) => ({ ...item, id: crypto.randomUUID() }))
     }))
     if (imported.length === 0) return

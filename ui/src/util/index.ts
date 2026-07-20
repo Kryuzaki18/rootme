@@ -1,3 +1,5 @@
+export const INSTANCE_DRAG_MIME = 'application/x-rootme-instance'
+
 export function stripExeSuffix(imageName: string): string {
   return imageName.replace(/\.exe$/i, '')
 }

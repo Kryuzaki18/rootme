@@ -1,7 +1,7 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
 import { Plus, ImagePlus, Check, X, Trash2, Pencil, FolderPlus, Download, Upload } from 'lucide-react'
 import { usePresetsStore, type PresetGroup, type PresetItem } from '../../../store/presetsStore'
-import { initials } from '../../../util'
+import { initials, INSTANCE_DRAG_MIME } from '../../../util'
 
 function downloadJson(filename: string, data: unknown) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -14,9 +14,12 @@ function downloadJson(filename: string, data: unknown) {
 }
 
 export default function Presets() {
-  const { groups, addGroup, deleteGroup, addItem, updateItem, deleteItem, importGroups } = usePresetsStore()
+  const { groups, addGroup, deleteGroup, renameGroup, addItem, updateItem, deleteItem, importGroups } = usePresetsStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [openGroupId, setOpenGroupId] = useState<string | null>(null)
+  const [dragOverGroupId, setDragOverGroupId] = useState<string | null>(null)
+  const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null)
+  const [renameDraft, setRenameDraft] = useState('')
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [titleDraft, setTitleDraft] = useState('')
   const [iconDraft, setIconDraft] = useState<string | undefined>(undefined)
@@ -51,6 +54,20 @@ export default function Presets() {
     setOpenGroupId(groupId)
   }
 
+  const handleRenameStart = (group: PresetGroup) => {
+    setRenameDraft(group.title)
+    setRenamingGroupId(group.id)
+  }
+
+  const handleRenameSave = (groupId: string) => {
+    renameGroup(groupId, renameDraft.trim())
+    setRenamingGroupId(null)
+  }
+
+  const handleRenameCancel = () => {
+    setRenamingGroupId(null)
+  }
+
   const handlePickIcon = async () => {
     const result = await window.api.pickIconFile()
     if (result) setIconDraft(result.dataUrl)
@@ -59,6 +76,47 @@ export default function Presets() {
   const handleDragStart = (event: DragEvent<HTMLDivElement>, item: PresetItem) => {
     event.dataTransfer.effectAllowed = 'copy'
     event.dataTransfer.setData('application/json', JSON.stringify(item))
+  }
+
+  const handleGroupDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (!event.dataTransfer.types.includes(INSTANCE_DRAG_MIME)) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+  }
+
+  const handleGroupDragEnter = (event: DragEvent<HTMLDivElement>, groupId: string) => {
+    if (!event.dataTransfer.types.includes(INSTANCE_DRAG_MIME)) return
+    event.preventDefault()
+    setDragOverGroupId(groupId)
+  }
+
+  const handleGroupDragLeave = () => {
+    setDragOverGroupId(null)
+  }
+
+  const handleGroupDrop = async (event: DragEvent<HTMLDivElement>, groupId: string) => {
+    const raw = event.dataTransfer.getData(INSTANCE_DRAG_MIME)
+    setDragOverGroupId(null)
+    if (!raw) return
+
+    event.preventDefault()
+
+    let instance: { pid: number; title: string; iconDataUrl?: string }
+    try {
+      instance = JSON.parse(raw)
+    } catch {
+      return
+    }
+
+    const bounds = await window.api.getWindowBounds(instance.pid)
+    addItem(groupId, {
+      title: instance.title,
+      iconDataUrl: instance.iconDataUrl,
+      width: bounds?.width ?? 0,
+      height: bounds?.height ?? 0,
+      x: bounds?.x ?? 0,
+      y: bounds?.y ?? 0
+    })
   }
 
   const handleExportAll = () => {
@@ -164,17 +222,72 @@ export default function Presets() {
         {groups.map((group) => {
           const formOpen = openGroupId === group.id
 
+          const isDragOver = dragOverGroupId === group.id
+
           return (
           <div
             key={group.id}
-            className="flex shrink-0 flex-col gap-2 rounded-lg border border-green-200 p-3 dark:border-green-800 dark:bg-green-950/10"
+            onDragOver={handleGroupDragOver}
+            onDragEnter={(event) => handleGroupDragEnter(event, group.id)}
+            onDragLeave={handleGroupDragLeave}
+            onDrop={(event) => handleGroupDrop(event, group.id)}
+            className={`flex shrink-0 flex-col gap-2 rounded-lg border p-3 transition dark:bg-green-950/10 ${
+              isDragOver
+                ? 'border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
+                : 'border-green-200 dark:border-green-800'
+            }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
-                <FolderPlus className="h-3.5 w-3.5" />
-                Group ({group.items.length})
-              </span>
-              <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between gap-2">
+              {renamingGroupId === group.id ? (
+                <div className="flex flex-1 items-center gap-1">
+                  <input
+                    type="text"
+                    value={renameDraft}
+                    onChange={(event) => setRenameDraft(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') handleRenameSave(group.id)
+                      if (event.key === 'Escape') handleRenameCancel()
+                    }}
+                    placeholder="Group name"
+                    autoFocus
+                    className="flex-1 rounded border border-green-300 bg-white px-2 py-1 text-xs text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRenameSave(group.id)}
+                    className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                    aria-label="Save group name"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRenameCancel}
+                    className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                    aria-label="Cancel rename"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
+                  <FolderPlus className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">
+                    {group.title || 'Group'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRenameStart(group)}
+                    className="shrink-0 cursor-pointer rounded-full p-1 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                    aria-label="Rename group"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+
+              {renamingGroupId !== group.id && (
+              <div className="flex shrink-0 items-center gap-1">
                 <button
                   type="button"
                   onClick={() => handleExportGroup(group)}
@@ -200,6 +313,7 @@ export default function Presets() {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
+              )}
             </div>
 
             {formOpen && (
