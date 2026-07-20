@@ -13,8 +13,6 @@ export default function AppInstanceRow({
 }) {
   const { toggleVisibility, focusInstance, toggleEdit, saveEdit } =
     useAppInstancesStore();
-  const addGroup = usePresetsStore((state) => state.addGroup);
-  const addItem = usePresetsStore((state) => state.addItem);
   const [nameDraft, setNameDraft] = useState(instance.displayName);
   const [iconDraft, setIconDraft] = useState<string | undefined>(
     instance.iconDataUrl,
@@ -60,16 +58,6 @@ export default function AppInstanceRow({
     if (hasValidBounds) {
       window.api.setWindowBounds(instance.pid, x, y, width, height);
     }
-
-    const groupId = addGroup();
-    addItem(groupId, {
-      title,
-      iconDataUrl: iconDraft,
-      width: hasValidBounds ? width : 0,
-      height: hasValidBounds ? height : 0,
-      x: hasValidBounds ? x : 0,
-      y: hasValidBounds ? y : 0,
-    });
   };
 
   const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
