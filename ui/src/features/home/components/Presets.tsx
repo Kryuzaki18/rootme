@@ -1,10 +1,21 @@
-import { useState, type DragEvent } from 'react'
-import { Plus, ImagePlus, Check, X, Trash2, Pencil, FolderPlus } from 'lucide-react'
-import { usePresetsStore, type PresetItem } from '../../../store/presetsStore'
+import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
+import { Plus, ImagePlus, Check, X, Trash2, Pencil, FolderPlus, Download, Upload } from 'lucide-react'
+import { usePresetsStore, type PresetGroup, type PresetItem } from '../../../store/presetsStore'
 import { initials } from '../../../util'
 
+function downloadJson(filename: string, data: unknown) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function Presets() {
-  const { groups, addGroup, deleteGroup, addItem, updateItem, deleteItem } = usePresetsStore()
+  const { groups, addGroup, deleteGroup, addItem, updateItem, deleteItem, importGroups } = usePresetsStore()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [openGroupId, setOpenGroupId] = useState<string | null>(null)
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [titleDraft, setTitleDraft] = useState('')
@@ -50,6 +61,31 @@ export default function Presets() {
     event.dataTransfer.setData('application/json', JSON.stringify(item))
   }
 
+  const handleExportAll = () => {
+    downloadJson('rootme-presets.json', groups)
+  }
+
+  const handleExportGroup = (group: PresetGroup) => {
+    downloadJson(`rootme-preset-group-${group.id}.json`, [group])
+  }
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleImportChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      importGroups(JSON.parse(text))
+    } catch {
+      // ignore invalid file
+    }
+  }
+
   const handleSave = (groupId: string) => {
     if (!titleDraft.trim()) return
 
@@ -83,14 +119,39 @@ export default function Presets() {
     <section className="flex w-100 shrink-0 flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-green-900 dark:text-green-100">Presets</h2>
-        <button
-          type="button"
-          onClick={() => addGroup()}
-          className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-          aria-label="Add preset group"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={handleImportChange}
+          />
+          <button
+            type="button"
+            onClick={handleImportClick}
+            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+            aria-label="Import presets"
+          >
+            <Upload className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleExportAll}
+            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+            aria-label="Export presets"
+          >
+            <Download className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => addGroup()}
+            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+            aria-label="Add preset group"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {groups.length === 0 && (
@@ -113,6 +174,14 @@ export default function Presets() {
                 Group ({group.items.length})
               </span>
               <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleExportGroup(group)}
+                  className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                  aria-label="Export group"
+                >
+                  <Download className="h-4 w-4" />
+                </button>
                 <button
                   type="button"
                   onClick={() => handleItemFormToggle(group.id)}

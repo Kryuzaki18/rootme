@@ -22,25 +22,27 @@ interface PresetsState {
   addItem: (groupId: string, item: Omit<PresetItem, 'id'>) => void
   updateItem: (groupId: string, itemId: string, item: Omit<PresetItem, 'id'>) => void
   deleteItem: (groupId: string, itemId: string) => void
+  importGroups: (data: unknown) => void
 }
 
 const STORAGE_KEY = 'rootme.presets'
+
+// Accepts either the current group format or a legacy flat preset list.
+function normalizeGroupsData(parsed: unknown): PresetGroup[] {
+  if (!Array.isArray(parsed) || parsed.length === 0) return []
+
+  if (!('items' in parsed[0])) {
+    return [{ id: crypto.randomUUID(), items: parsed as PresetItem[] }]
+  }
+
+  return parsed as PresetGroup[]
+}
 
 function loadGroups(): PresetGroup[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
-
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    if (parsed.length === 0) return []
-
-    // Migrate legacy flat preset list (no `items` field) into a single group.
-    if (!('items' in parsed[0])) {
-      return [{ id: crypto.randomUUID(), items: parsed as PresetItem[] }]
-    }
-
-    return parsed as PresetGroup[]
+    return normalizeGroupsData(JSON.parse(raw))
   } catch {
     return []
   }
@@ -89,6 +91,18 @@ export const usePresetsStore = create<PresetsState>((set, get) => ({
     const groups = get().groups.map((group) =>
       group.id === groupId ? { ...group, items: group.items.filter((existing) => existing.id !== itemId) } : group
     )
+    persistGroups(groups)
+    set({ groups })
+  },
+
+  importGroups: (data) => {
+    const imported = normalizeGroupsData(data).map((group) => ({
+      id: crypto.randomUUID(),
+      items: group.items.map((item) => ({ ...item, id: crypto.randomUUID() }))
+    }))
+    if (imported.length === 0) return
+
+    const groups = [...get().groups, ...imported]
     persistGroups(groups)
     set({ groups })
   }
