@@ -75,13 +75,13 @@ export default function Presets() {
   }
 
   return (
-    <section className="flex w-64 shrink-0 flex-col gap-3">
+    <section className="flex w-100 shrink-0 flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-green-900 dark:text-green-100">Presets</h2>
         <button
           type="button"
           onClick={handleFormToggle}
-          className="rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+          className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
           aria-label={formOpen ? 'Cancel' : 'Add preset'}
         >
           {formOpen ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
@@ -89,12 +89,12 @@ export default function Presets() {
       </div>
 
       {formOpen && (
-        <div className="flex flex-col gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2.5 dark:border-green-800 dark:bg-green-950/60">
+        <div className="flex flex-col gap-2 rounded-lg border border-green-200 px-3 py-2.5 dark:border-green-800 dark:bg-green-950/20">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handlePickIcon}
-              className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
+              className="cursor-pointer flex h-8 w-8 p-0.5 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
               aria-label="Choose preset icon"
             >
               {iconDraft ? (
@@ -110,7 +110,7 @@ export default function Presets() {
               onChange={(event) => setTitleDraft(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && handleSave()}
               placeholder="Preset name"
-              className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+              className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
             />
           </div>
 
@@ -123,7 +123,7 @@ export default function Presets() {
                 onChange={(event) => setWidthDraft(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && handleSave()}
                 placeholder="Width"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
@@ -134,7 +134,7 @@ export default function Presets() {
                 onChange={(event) => setHeightDraft(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && handleSave()}
                 placeholder="Height"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
@@ -145,7 +145,7 @@ export default function Presets() {
                 onChange={(event) => setXDraft(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && handleSave()}
                 placeholder="X"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
@@ -156,7 +156,7 @@ export default function Presets() {
                 onChange={(event) => setYDraft(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && handleSave()}
                 placeholder="Y"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
               />
             </label>
           </div>
@@ -165,7 +165,7 @@ export default function Presets() {
             type="button"
             onClick={handleSave}
             disabled={!titleDraft.trim()}
-            className="flex items-center justify-center gap-2 rounded bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-600 dark:hover:bg-green-500"
+            className="cursor-pointer flex items-center justify-center gap-2 rounded bg-green-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Check className="h-4 w-4" />
             {editingId ? 'Save changes' : 'Save preset'}

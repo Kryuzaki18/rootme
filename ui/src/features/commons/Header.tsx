@@ -22,7 +22,7 @@ export default function Header() {
   }, [theme]);
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-green-200 bg-green-100/90 px-6 py-4 backdrop-blur dark:border-green-900 dark:bg-gray-950/90">
+    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-green-200 bg-green-50/30 px-6 py-4 backdrop-blur dark:border-green-900 dark:bg-gray-950/90">
       <div className="flex items-center gap-3">
         <img
           src="/rootme-logo.png"
@@ -44,7 +44,7 @@ export default function Header() {
         onClick={() =>
           setTheme((current) => (current === "dark" ? "light" : "dark"))
         }
-        className="flex h-9 w-9 items-center justify-center rounded-full  text-green-700 transition hover:bg-green-200  dark:text-green-300 dark:hover:bg-green-900"
+        className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-full  text-green-700 transition hover:bg-green-100  dark:text-green-300 dark:hover:bg-green-900/30"
         aria-label="Toggle theme"
       >
         {theme === "dark" ? (

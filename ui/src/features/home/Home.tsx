@@ -14,7 +14,7 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto flex max-w-5xl gap-6 py-8">
+    <main className="flex gap-10 p-5">
       <Presets />
 
       <div className="flex flex-1 flex-col gap-6">
