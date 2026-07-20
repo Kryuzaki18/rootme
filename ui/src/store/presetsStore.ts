@@ -8,6 +8,7 @@ export interface PresetItem {
   height: number
   x: number
   y: number
+  pid?: number
 }
 
 export interface PresetGroup {
@@ -23,6 +24,7 @@ interface PresetsState {
   renameGroup: (groupId: string, title: string) => void
   addItem: (groupId: string, item: Omit<PresetItem, 'id'>) => void
   updateItem: (groupId: string, itemId: string, item: Omit<PresetItem, 'id'>) => void
+  updateItemPid: (groupId: string, itemId: string, pid: number) => void
   deleteItem: (groupId: string, itemId: string) => void
   importGroups: (data: unknown) => void
 }
@@ -93,6 +95,16 @@ export const usePresetsStore = create<PresetsState>((set, get) => ({
     const groups = get().groups.map((group) =>
       group.id === groupId
         ? { ...group, items: group.items.map((existing) => (existing.id === itemId ? { ...item, id: itemId } : existing)) }
+        : group
+    )
+    persistGroups(groups)
+    set({ groups })
+  },
+
+  updateItemPid: (groupId, itemId, pid) => {
+    const groups = get().groups.map((group) =>
+      group.id === groupId
+        ? { ...group, items: group.items.map((existing) => (existing.id === itemId ? { ...existing, pid } : existing)) }
         : group
     )
     persistGroups(groups)

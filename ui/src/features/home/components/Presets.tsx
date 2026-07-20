@@ -10,7 +10,9 @@ import {
   Download,
   Upload,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Focus,
+  Minimize2
 } from 'lucide-react'
 import { usePresetsStore, type PresetGroup, type PresetItem } from '../../../store/presetsStore'
 import { initials, INSTANCE_DRAG_MIME } from '../../../util'
@@ -26,16 +28,29 @@ function downloadJson(filename: string, data: unknown) {
 }
 
 export default function Presets() {
-  const { groups, addGroup, deleteGroup, renameGroup, addItem, updateItem, deleteItem, importGroups } = usePresetsStore()
+  const {
+    groups,
+    addGroup,
+    deleteGroup,
+    renameGroup,
+    addItem,
+    updateItem,
+    updateItemPid,
+    deleteItem,
+    importGroups
+  } = usePresetsStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [openGroupId, setOpenGroupId] = useState<string | null>(null)
   const [dragOverGroupId, setDragOverGroupId] = useState<string | null>(null)
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null)
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(new Set())
+  const [focusedPids, setFocusedPids] = useState<Set<number>>(new Set())
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [titleDraft, setTitleDraft] = useState('')
   const [iconDraft, setIconDraft] = useState<string | undefined>(undefined)
+  const [pidDraft, setPidDraft] = useState('')
   const [widthDraft, setWidthDraft] = useState('')
   const [heightDraft, setHeightDraft] = useState('')
   const [xDraft, setXDraft] = useState('')
@@ -44,6 +59,7 @@ export default function Presets() {
   const resetDraft = () => {
     setTitleDraft('')
     setIconDraft(undefined)
+    setPidDraft('')
     setWidthDraft('')
     setHeightDraft('')
     setXDraft('')
@@ -59,6 +75,7 @@ export default function Presets() {
   const handleEditStart = (groupId: string, item: PresetItem) => {
     setTitleDraft(item.title)
     setIconDraft(item.iconDataUrl)
+    setPidDraft(item.pid !== undefined ? String(item.pid) : '')
     setWidthDraft(String(item.width))
     setHeightDraft(String(item.height))
     setXDraft(String(item.x))
@@ -119,6 +136,12 @@ export default function Presets() {
     setDragOverGroupId(null)
   }
 
+  const isPidTakenInGroup = (groupId: string, pid: number, excludeItemId?: string) => {
+    const group = groups.find((candidate) => candidate.id === groupId)
+    if (!group) return false
+    return group.items.some((item) => item.id !== excludeItemId && item.pid === pid)
+  }
+
   const handleGroupDrop = async (event: DragEvent<HTMLDivElement>, groupId: string) => {
     const raw = event.dataTransfer.getData(INSTANCE_DRAG_MIME)
     setDragOverGroupId(null)
@@ -140,7 +163,100 @@ export default function Presets() {
       width: bounds?.width ?? 0,
       height: bounds?.height ?? 0,
       x: bounds?.x ?? 0,
-      y: bounds?.y ?? 0
+      y: bounds?.y ?? 0,
+      pid: isPidTakenInGroup(groupId, instance.pid) ? undefined : instance.pid
+    })
+  }
+
+  const handleItemDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (!event.dataTransfer.types.includes(INSTANCE_DRAG_MIME)) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+  }
+
+  const handleItemDragEnter = (event: DragEvent<HTMLDivElement>, itemId: string) => {
+    if (!event.dataTransfer.types.includes(INSTANCE_DRAG_MIME)) return
+    event.preventDefault()
+    event.stopPropagation()
+    setDragOverItemId(itemId)
+  }
+
+  const handleItemDragLeave = () => {
+    setDragOverItemId(null)
+  }
+
+  const handleItemDrop = (event: DragEvent<HTMLDivElement>, groupId: string, item: PresetItem) => {
+    const raw = event.dataTransfer.getData(INSTANCE_DRAG_MIME)
+    setDragOverItemId(null)
+    setDragOverGroupId(null)
+    if (!raw) return
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    // Only bind a PID to a preset that doesn't already have one, and never duplicate
+    // a PID that's already assigned to another preset in the same group.
+    if (item.pid !== undefined) return
+
+    let instance: { pid: number }
+    try {
+      instance = JSON.parse(raw)
+    } catch {
+      return
+    }
+
+    if (isPidTakenInGroup(groupId, instance.pid)) return
+
+    updateItemPid(groupId, item.id, instance.pid)
+  }
+
+  const handleItemFocusToggle = async (item: PresetItem) => {
+    if (item.pid === undefined) return
+
+    const isFocused = focusedPids.has(item.pid)
+    const success = isFocused
+      ? await window.api.setWindowVisibility(item.pid, false)
+      : await window.api.focusWindow(item.pid)
+    if (!success) return
+
+    setFocusedPids((current) => {
+      const next = new Set(current)
+      if (isFocused) {
+        next.delete(item.pid!)
+      } else {
+        next.add(item.pid!)
+      }
+      return next
+    })
+  }
+
+  const handleGroupFocusToggle = async (group: PresetGroup) => {
+    const pids = group.items.map((item) => item.pid).filter((pid): pid is number => pid !== undefined)
+    if (pids.length === 0) return
+
+    const isGroupFocused = pids.every((pid) => focusedPids.has(pid))
+    const nextFocused = !isGroupFocused
+
+    for (const item of group.items) {
+      if (item.pid === undefined) continue
+
+      if (nextFocused) {
+        await window.api.focusWindow(item.pid)
+      } else {
+        await window.api.setWindowVisibility(item.pid, false)
+      }
+    }
+
+    setFocusedPids((current) => {
+      const next = new Set(current)
+      for (const pid of pids) {
+        if (nextFocused) {
+          next.add(pid)
+        } else {
+          next.delete(pid)
+        }
+      }
+      return next
     })
   }
 
@@ -171,7 +287,16 @@ export default function Presets() {
     }
   }
 
-  const renderPresetForm = (groupId: string, wrapperClassName: string) => (
+  const renderPresetForm = (groupId: string, wrapperClassName: string) => {
+    const trimmedPid = pidDraft.trim()
+    const parsedPid = trimmedPid ? Number(trimmedPid) : undefined
+    const isInvalidPid = parsedPid !== undefined && !Number.isFinite(parsedPid)
+    const isDuplicatePid =
+      parsedPid !== undefined &&
+      Number.isFinite(parsedPid) &&
+      isPidTakenInGroup(groupId, parsedPid, editingItemId ?? undefined)
+
+    return (
     <div className={`flex flex-col gap-2 px-3 py-2.5 dark:bg-green-950/20 ${wrapperClassName}`}>
       <div className="flex items-center gap-2">
         <button
@@ -196,6 +321,36 @@ export default function Presets() {
           className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
         />
       </div>
+
+      <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
+        PID (optional)
+        <div className="relative">
+          <input
+            type="number"
+            value={pidDraft}
+            onChange={(event) => setPidDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && handleSave(groupId)}
+            placeholder="Process ID"
+            className={`w-full rounded border bg-white px-2 py-1 pr-7 text-sm text-green-950 focus:outline-none focus:ring-2 dark:bg-green-900/20 dark:text-green-50 ${
+              isDuplicatePid || isInvalidPid
+                ? 'border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:ring-red-900'
+                : 'border-green-300 focus:border-green-500 focus:ring-green-100 dark:border-green-700 dark:focus:ring-green-800'
+            }`}
+          />
+          <button
+            type="button"
+            disabled={!!!pidDraft}
+            onClick={() => setPidDraft('')}
+            className="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+            aria-label="Clear PID"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        {isDuplicatePid && (
+          <span className="text-red-500 dark:text-red-400">This PID is already used in this group.</span>
+        )}
+      </label>
 
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
@@ -247,17 +402,23 @@ export default function Presets() {
       <button
         type="button"
         onClick={() => handleSave(groupId)}
-        disabled={!titleDraft.trim()}
+        disabled={!titleDraft.trim() || isDuplicatePid || isInvalidPid}
         className="cursor-pointer flex items-center justify-center gap-2 rounded bg-green-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Check className="h-4 w-4" />
         {editingItemId ? 'Save changes' : 'Save preset'}
       </button>
     </div>
-  )
+    )
+  }
 
   const handleSave = (groupId: string) => {
     if (!titleDraft.trim()) return
+
+    const trimmedPid = pidDraft.trim()
+    const parsedPid = trimmedPid ? Number(trimmedPid) : undefined
+    if (parsedPid !== undefined && !Number.isFinite(parsedPid)) return
+    if (parsedPid !== undefined && isPidTakenInGroup(groupId, parsedPid, editingItemId ?? undefined)) return
 
     const width = Number(widthDraft)
     const height = Number(heightDraft)
@@ -268,6 +429,7 @@ export default function Presets() {
     const values = {
       title: titleDraft.trim(),
       iconDataUrl: iconDraft,
+      pid: parsedPid,
       width: hasValidBounds ? width : 0,
       height: hasValidBounds ? height : 0,
       x: hasValidBounds ? x : 0,
@@ -337,6 +499,8 @@ export default function Presets() {
 
           const isDragOver = dragOverGroupId === group.id
           const isCollapsed = collapsedGroupIds.has(group.id)
+          const groupPids = group.items.map((item) => item.pid).filter((pid): pid is number => pid !== undefined)
+          const isGroupFocused = groupPids.length > 0 && groupPids.every((pid) => focusedPids.has(pid))
 
           return (
           <div
@@ -412,6 +576,15 @@ export default function Presets() {
               <div className="flex shrink-0 items-center gap-1">
                 <button
                   type="button"
+                  onClick={() => handleGroupFocusToggle(group)}
+                  disabled={groupPids.length === 0}
+                  className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
+                  aria-label={isGroupFocused ? 'Send group to tray' : 'Focus group'}
+                >
+                  {isGroupFocused ? <Minimize2 className="h-4 w-4" /> : <Focus className="h-4 w-4" />}
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleExportGroup(group)}
                   disabled={group.items.length === 0}
                   className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
@@ -452,11 +625,21 @@ export default function Presets() {
 
             {!isCollapsed && group.items.map((item) => {
               const isEditingThisItem = formOpen && editingItemId === item.id
+              const isItemFocused = item.pid !== undefined && focusedPids.has(item.pid)
+              const isItemDragOver = dragOverItemId === item.id
 
               return (
               <div
                 key={item.id}
-                className="flex shrink-0 flex-col overflow-hidden rounded-lg border border-green-200 bg-white dark:border-green-800 dark:bg-green-900/30"
+                onDragOver={handleItemDragOver}
+                onDragEnter={(event) => handleItemDragEnter(event, item.id)}
+                onDragLeave={handleItemDragLeave}
+                onDrop={(event) => handleItemDrop(event, group.id, item)}
+                className={`flex shrink-0 flex-col overflow-hidden rounded-lg border bg-white transition dark:bg-green-900/30 ${
+                  isItemDragOver
+                    ? 'border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
+                    : 'border-green-200 dark:border-green-800'
+                }`}
               >
                 <div
                   draggable
@@ -475,9 +658,19 @@ export default function Presets() {
                     <p className="truncate text-sm font-medium text-green-950 dark:text-green-50">{item.title}</p>
                     <p className="truncate text-xs text-green-600 dark:text-green-400">
                       {item.width}×{item.height} at ({item.x}, {item.y})
+                      {item.pid !== undefined && ` · PID ${item.pid}`}
                     </p>
                   </div>
 
+                  <button
+                    type="button"
+                    onClick={() => handleItemFocusToggle(item)}
+                    disabled={item.pid === undefined}
+                    className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-800"
+                    aria-label={isItemFocused ? 'Send to tray' : 'Focus'}
+                  >
+                    {isItemFocused ? <Minimize2 className="h-4 w-4" /> : <Focus className="h-4 w-4" />}
+                  </button>
                   <button
                     type="button"
                     onClick={() =>
