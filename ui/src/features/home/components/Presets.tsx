@@ -154,7 +154,7 @@ export default function Presets() {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+      <div className="app-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
         {groups.length === 0 && (
           <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
             No preset groups yet.

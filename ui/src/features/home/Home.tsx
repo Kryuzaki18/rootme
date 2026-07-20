@@ -14,7 +14,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex h-screen gap-10 p-5">
+    <main className="flex h-150 gap-10 p-5 pb-15">
       <Presets />
 
       <div className="flex min-h-0 flex-1 flex-col gap-6">
@@ -44,7 +44,7 @@ export default function Home() {
           </p>
         )}
 
-        <section className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+        <section className="app-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
           {hasSearched && !isLoading && instances.length === 0 && (
             <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
               No running instances match &ldquo;{title}&rdquo;.
