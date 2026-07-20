@@ -1,3 +1,4 @@
 export const STORAGE_KEYS = {
-  THEME: 'rootme-theme',
-}
+  THEME: "rootme.theme",
+  PRESETS: "rootme.presets",
+};

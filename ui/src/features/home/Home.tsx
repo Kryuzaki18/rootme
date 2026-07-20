@@ -4,6 +4,7 @@ import { useAppInstancesStore } from '../../store/appInstancesStore'
 import AppInstanceRow from './components/AppInstanceRow'
 import AppInstanceRowSkeleton from './components/AppInstanceRowSkeleton'
 import Presets from './components/Presets'
+import { SKELETON_ROW_COUNT } from '../../constants/ui.constant'
 
 export default function Home() {
   const [title, setTitle] = useState('')
@@ -66,7 +67,7 @@ export default function Home() {
           )}
 
           {isLoading
-            ? Array.from({ length: 7 }, (_, index) => <AppInstanceRowSkeleton key={index} />)
+            ? Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => <AppInstanceRowSkeleton key={index} />)
             : instances.map((instance) => <AppInstanceRow key={instance.pid} instance={instance} />)}
         </section>
       </div>

@@ -5,7 +5,8 @@ import {
   type AppInstance,
 } from "../../../store/appInstancesStore";
 import type { PresetItem } from "../../../store/presetsStore";
-import { INSTANCE_DRAG_MIME } from "../../../util";
+import { DRAG_MIME_TYPES } from "../../../constants/drag.constant";
+import { PID_COPIED_RESET_MS } from "../../../constants/ui.constant";
 
 export default function AppInstanceRow({
   instance,
@@ -29,7 +30,7 @@ export default function AppInstanceRow({
     try {
       await navigator.clipboard.writeText(String(instance.pid));
       setPidCopied(true);
-      setTimeout(() => setPidCopied(false), 1500);
+      setTimeout(() => setPidCopied(false), PID_COPIED_RESET_MS);
     } catch {
       // ignore clipboard failures
     }
@@ -90,7 +91,7 @@ export default function AppInstanceRow({
     event.preventDefault();
     setIsDragOver(false);
 
-    const raw = event.dataTransfer.getData("application/json");
+    const raw = event.dataTransfer.getData(DRAG_MIME_TYPES.PRESET_ITEM);
     if (!raw) return;
 
     let preset: PresetItem;
@@ -113,7 +114,7 @@ export default function AppInstanceRow({
   const handleInstanceDragStart = (event: DragEvent<HTMLDivElement>) => {
     event.dataTransfer.effectAllowed = "copy";
     event.dataTransfer.setData(
-      INSTANCE_DRAG_MIME,
+      DRAG_MIME_TYPES.APP_INSTANCE,
       JSON.stringify({
         pid: instance.pid,
         title: instance.windowTitle || instance.displayName,

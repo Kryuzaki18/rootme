@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { STORAGE_KEYS } from '../constants/storage.constant'
 
 export interface PresetItem {
   id: string
@@ -29,7 +30,7 @@ interface PresetsState {
   importGroups: (data: unknown) => void
 }
 
-const STORAGE_KEY = 'rootme.presets'
+const STORAGE_KEY = STORAGE_KEYS.PRESETS
 
 function normalizeGroupsData(parsed: unknown): PresetGroup[] {
   if (!Array.isArray(parsed) || parsed.length === 0) return []
