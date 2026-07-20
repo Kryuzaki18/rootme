@@ -446,7 +446,10 @@ export default function Presets() {
               </p>
             )}
 
-            {!isCollapsed && group.items.map((item) => (
+            {!isCollapsed && group.items.map((item) => {
+              const isEditingThisItem = formOpen && editingItemId === item.id
+
+              return (
               <div
                 key={item.id}
                 className="flex shrink-0 flex-col overflow-hidden rounded-lg border border-green-200 bg-white dark:border-green-800 dark:bg-green-900/30"
@@ -473,27 +476,29 @@ export default function Presets() {
 
                   <button
                     type="button"
-                    onClick={() => handleEditStart(group.id, item)}
-                    className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-                    aria-label="Edit preset"
+                    onClick={() =>
+                      isEditingThisItem ? handleItemFormToggle(group.id) : handleEditStart(group.id, item)
+                    }
+                    className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+                    aria-label={isEditingThisItem ? 'Cancel edit' : 'Edit preset'}
                   >
-                    <Pencil className="h-4 w-4" />
+                    {isEditingThisItem ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteItem(group.id, item.id)}
-                    className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+                    className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
                     aria-label="Delete preset"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
 
-                {formOpen &&
-                  editingItemId === item.id &&
+                {isEditingThisItem &&
                   renderPresetForm(group.id, 'border-t border-green-200 dark:border-green-800')}
               </div>
-            ))}
+              )
+            })}
           </div>
           )
         })}
