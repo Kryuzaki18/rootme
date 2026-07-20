@@ -1,5 +1,5 @@
 import { useState, type DragEvent } from "react";
-import { Eye, EyeOff, Focus, Pencil, ImagePlus, Check, X } from "lucide-react";
+import { Eye, EyeOff, Focus, Pencil, ImagePlus, Check, X, Copy } from "lucide-react";
 import {
   useAppInstancesStore,
   type AppInstance,
@@ -23,6 +23,17 @@ export default function AppInstanceRow({
   const [xDraft, setXDraft] = useState("");
   const [yDraft, setYDraft] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [pidCopied, setPidCopied] = useState(false);
+
+  const handleCopyPid = async () => {
+    try {
+      await navigator.clipboard.writeText(String(instance.pid));
+      setPidCopied(true);
+      setTimeout(() => setPidCopied(false), 1500);
+    } catch {
+      // ignore clipboard failures
+    }
+  };
 
   const handlePickIcon = async () => {
     const result = await window.api.pickIconFile();
@@ -127,8 +138,20 @@ export default function AppInstanceRow({
     >
       <div className="flex items-center gap-10 px-4 py-3">
         <div className="flex flex-col gap-1">
-          <span className="font-mono text-[9px] text-green-700 dark:text-green-300">
+          <span className="flex items-center gap-1 font-mono text-[9px] text-green-700 dark:text-green-300">
             PID {instance.pid}
+            <button
+              type="button"
+              onClick={handleCopyPid}
+              className="cursor-pointer rounded p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+              aria-label="Copy PID"
+            >
+              {pidCopied ? (
+                <Check className="h-2.5 w-2.5" />
+              ) : (
+                <Copy className="h-2.5 w-2.5" />
+              )}
+            </button>
           </span>
           <span className="font-mono text-[9px] text-green-700 dark:text-green-300">
             Memory {instance.memUsage}
