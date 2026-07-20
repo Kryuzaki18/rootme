@@ -29,6 +29,8 @@ const api = {
 
   focusWindow: (pid: number): Promise<boolean> => ipcRenderer.invoke('processes:focus', pid),
 
+  hideWindowToTray: (pid: number): Promise<boolean> => ipcRenderer.invoke('processes:hideToTray', pid),
+
   getWindowBounds: (pid: number): Promise<WindowBoundsDto | null> =>
     ipcRenderer.invoke('processes:getBounds', pid),
 

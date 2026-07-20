@@ -7,6 +7,7 @@ import {
   setWindowTitle,
   setWindowIcon,
   focusWindow,
+  hideWindowToTray,
   getWindowBounds,
   setWindowBounds
 } from './processManager'
@@ -74,6 +75,8 @@ function registerIpcHandlers(): void {
   )
 
   ipcMain.handle('processes:focus', (_event, pid: number) => focusWindow(pid))
+
+  ipcMain.handle('processes:hideToTray', (_event, pid: number) => hideWindowToTray(pid))
 
   ipcMain.handle('processes:getBounds', (_event, pid: number) => getWindowBounds(pid))
 

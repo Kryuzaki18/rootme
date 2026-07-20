@@ -7,6 +7,7 @@ import { randomUUID } from 'crypto'
 
 const execFileAsync = promisify(execFile)
 
+const SW_HIDE = 0
 const SW_MINIMIZE = 6
 const SW_RESTORE = 9
 
@@ -157,6 +158,22 @@ export async function setWindowVisibility(pid: number, visible: boolean): Promis
   const body = [
     'if ($hwnd -ne [IntPtr]::Zero) {',
     `  [RootMeWin32]::ShowWindowAsync($hwnd, ${showCommand}) | Out-Null`,
+    '  Write-Output "True"',
+    '} else {',
+    '  Write-Output "False"',
+    '}'
+  ].join('\n')
+
+  const result = await runWin32Script(pid, body)
+  return result.toLowerCase() === 'true'
+}
+
+export async function hideWindowToTray(pid: number): Promise<boolean> {
+  if (!Number.isInteger(pid)) return false
+
+  const body = [
+    'if ($hwnd -ne [IntPtr]::Zero) {',
+    `  [RootMeWin32]::ShowWindowAsync($hwnd, ${SW_HIDE}) | Out-Null`,
     '  Write-Output "True"',
     '} else {',
     '  Write-Output "False"',

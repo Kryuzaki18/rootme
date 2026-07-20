@@ -18,6 +18,7 @@ export interface ElectronApi {
   setWindowTitle: (pid: number, title: string) => Promise<boolean>
   setWindowIcon: (pid: number, iconDataUrl: string) => Promise<boolean>
   focusWindow: (pid: number) => Promise<boolean>
+  hideWindowToTray: (pid: number) => Promise<boolean>
   getWindowBounds: (pid: number) => Promise<WindowBoundsDto | null>
   setWindowBounds: (pid: number, x: number, y: number, width: number, height: number) => Promise<boolean>
   pickIconFile: () => Promise<{ dataUrl: string } | null>

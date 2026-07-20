@@ -215,7 +215,7 @@ export default function Presets() {
 
     const isFocused = focusedPids.has(item.pid)
     const success = isFocused
-      ? await window.api.setWindowVisibility(item.pid, false)
+      ? await window.api.hideWindowToTray(item.pid)
       : await window.api.focusWindow(item.pid)
     if (!success) return
 
@@ -243,7 +243,7 @@ export default function Presets() {
       if (nextFocused) {
         await window.api.focusWindow(item.pid)
       } else {
-        await window.api.setWindowVisibility(item.pid, false)
+        await window.api.hideWindowToTray(item.pid)
       }
     }
 
