@@ -145,10 +145,12 @@ export default function Presets() {
   }
 
   const handleExportAll = () => {
+    if (groups.length === 0) return
     downloadJson('rootme-presets.json', groups)
   }
 
   const handleExportGroup = (group: PresetGroup) => {
+    if (group.items.length === 0) return
     downloadJson(`rootme-preset-group-${group.id}.json`, [group])
   }
 
@@ -306,7 +308,8 @@ export default function Presets() {
           <button
             type="button"
             onClick={handleExportAll}
-            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+            disabled={groups.length === 0}
+            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
             aria-label="Export presets"
           >
             <Download className="h-4 w-4" />
@@ -410,7 +413,8 @@ export default function Presets() {
                 <button
                   type="button"
                   onClick={() => handleExportGroup(group)}
-                  className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                  disabled={group.items.length === 0}
+                  className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
                   aria-label="Export group"
                 >
                   <Download className="h-4 w-4" />
