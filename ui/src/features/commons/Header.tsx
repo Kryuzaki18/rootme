@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { APP_NAME, APP_TAGLINE } from "../../constants";
 import { STORAGE_KEYS } from "@/constants/storage.constant";
+import { APP_NAME, APP_TAGLINE } from "@/constants/app.constant";
 
 type Theme = "light" | "dark";
 
