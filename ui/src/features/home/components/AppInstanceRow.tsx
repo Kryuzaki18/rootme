@@ -28,6 +28,7 @@ export default function AppInstanceRow({
   const [xDraft, setXDraft] = useState("");
   const [yDraft, setYDraft] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [pidCopied, setPidCopied] = useState(false);
 
   const handleCopyPid = async () => {
@@ -119,17 +120,25 @@ export default function AppInstanceRow({
         iconDataUrl: instance.iconDataUrl,
       }),
     );
+    setIsDragging(true);
+  };
+
+  const handleInstanceDragEnd = () => {
+    setIsDragging(false);
   };
 
   return (
     <div
       draggable
       onDragStart={handleInstanceDragStart}
+      onDragEnd={handleInstanceDragEnd}
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`row-enter shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition active:cursor-grabbing dark:bg-green-900/30 ${
+      className={`row-enter shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition duration-150 active:cursor-grabbing dark:bg-green-900/30 ${
+        isDragging ? "rotate-2 scale-[1.03] opacity-80 shadow-lg" : ""
+      } ${
         isDragOver
           ? "border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
           : "border-green-200 dark:border-green-800"

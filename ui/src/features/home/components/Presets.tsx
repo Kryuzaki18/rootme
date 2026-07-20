@@ -49,6 +49,7 @@ export default function Presets() {
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
   const [dragOverGroupId, setDragOverGroupId] = useState<string | null>(null);
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
+  const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(
@@ -129,6 +130,11 @@ export default function Presets() {
   ) => {
     event.dataTransfer.effectAllowed = "copy";
     event.dataTransfer.setData(DRAG_MIME_TYPES.PRESET_ITEM, JSON.stringify(item));
+    setDraggingItemId(item.id);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingItemId(null);
   };
 
   const handleGroupDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -499,7 +505,7 @@ export default function Presets() {
         </div>
       </div>
 
-      <div className="app-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+      <div className="app-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto pr-1">
         {groups.length === 0 && (
           <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
             No preset groups yet.
@@ -639,6 +645,7 @@ export default function Presets() {
                   const isItemFocused =
                     item.pid !== undefined && focusedPids.has(item.pid);
                   const isItemDragOver = dragOverItemId === item.id;
+                  const isItemDragging = draggingItemId === item.id;
 
                   return (
                     <div
@@ -649,7 +656,11 @@ export default function Presets() {
                       }
                       onDragLeave={handleItemDragLeave}
                       onDrop={(event) => handleItemDrop(event, group.id, item)}
-                      className={`flex shrink-0 flex-col overflow-hidden rounded-lg border bg-white transition dark:bg-green-900/30 ${
+                      className={`flex shrink-0 flex-col overflow-hidden rounded-lg border bg-white transition duration-150 dark:bg-green-900/30 ${
+                        isItemDragging
+                          ? "-rotate-2 scale-[1.03] opacity-80 shadow-lg"
+                          : ""
+                      } ${
                         isItemDragOver
                           ? "border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
                           : "border-green-200 dark:border-green-800"
@@ -658,7 +669,8 @@ export default function Presets() {
                       <div
                         draggable
                         onDragStart={(event) => handleDragStart(event, item)}
-                        className="flex cursor-grab items-center gap-3 px-3 py-2.5 active:cursor-grabbing"
+                        onDragEnd={handleDragEnd}
+                        className="flex cursor-grab items-center gap-1 p-2 active:cursor-grabbing"
                       >
                         {item.iconDataUrl ? (
                           <img
@@ -676,9 +688,9 @@ export default function Presets() {
                           <p className="truncate text-sm font-medium text-green-950 dark:text-green-50">
                             {item.title}
                           </p>
-                          <p className="truncate text-xs text-green-600 dark:text-green-400">
+                          <p className="truncate text-[10px] text-green-600 dark:text-green-400">
+                            {item.pid !== undefined && `PID ${item.pid} - `}
                             {item.width}×{item.height} at ({item.x}, {item.y})
-                            {item.pid !== undefined && ` · PID ${item.pid}`}
                           </p>
                         </div>
 
