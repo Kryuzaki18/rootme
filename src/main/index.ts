@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
-import { join } from 'path'
-import { readFileSync } from 'fs'
+import { join, dirname } from 'path'
+import { readFileSync, writeFileSync } from 'fs'
 import {
   verifyProcesses,
   setWindowVisibility,
@@ -13,6 +13,27 @@ import {
 
 app.disableHardwareAcceleration()
 app.commandLine.appendSwitch('no-sandbox')
+
+function getIconPickerStateFile(): string {
+  return join(app.getPath('userData'), 'icon-picker-state.json')
+}
+
+function readLastIconDir(): string | undefined {
+  try {
+    const raw = readFileSync(getIconPickerStateFile(), 'utf-8')
+    return (JSON.parse(raw) as { lastIconDir?: string }).lastIconDir
+  } catch {
+    return undefined
+  }
+}
+
+function writeLastIconDir(dir: string): void {
+  try {
+    writeFileSync(getIconPickerStateFile(), JSON.stringify({ lastIconDir: dir }))
+  } catch {
+    // ignore persistence failures
+  }
+}
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -64,10 +85,12 @@ function registerIpcHandlers(): void {
 
   ipcMain.handle('icon:pick', async () => {
     const win = BrowserWindow.getFocusedWindow()
+    const lastIconDir = readLastIconDir()
     const dialogOptions: Electron.OpenDialogOptions = {
       title: 'Choose app icon',
       properties: ['openFile'],
-      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'ico', 'svg'] }]
+      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'ico', 'svg'] }],
+      ...(lastIconDir ? { defaultPath: lastIconDir } : {})
     }
     const result = win
       ? await dialog.showOpenDialog(win, dialogOptions)
@@ -79,6 +102,8 @@ function registerIpcHandlers(): void {
     const buffer = readFileSync(filePath)
     const ext = filePath.split('.').pop()?.toLowerCase() ?? 'png'
     const mime = ext === 'svg' ? 'image/svg+xml' : ext === 'ico' ? 'image/x-icon' : `image/${ext}`
+
+    writeLastIconDir(dirname(filePath))
 
     return { dataUrl: `data:${mime};base64,${buffer.toString('base64')}` }
   })
