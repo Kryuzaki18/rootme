@@ -101,17 +101,27 @@ public static class RootMeWin32 {
     public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
     public static IntPtr FindMainWindow(uint pid) {
-        IntPtr found = IntPtr.Zero;
+        // Apps minimized to the system tray typically hide their window (SW_HIDE)
+        // rather than just iconify it, so IsWindowVisible is false. Prefer a visible
+        // window, but fall back to a hidden one so tray-minimized apps can still be
+        // found and restored.
+        IntPtr visibleFound = IntPtr.Zero;
+        IntPtr hiddenFound = IntPtr.Zero;
         EnumWindows((hWnd, lParam) => {
             uint windowPid;
             GetWindowThreadProcessId(hWnd, out windowPid);
-            if (windowPid == pid && IsWindowVisible(hWnd) && GetWindowTextLength(hWnd) > 0) {
-                found = hWnd;
-                return false;
+            if (windowPid == pid && GetWindowTextLength(hWnd) > 0) {
+                if (IsWindowVisible(hWnd)) {
+                    visibleFound = hWnd;
+                    return false;
+                }
+                if (hiddenFound == IntPtr.Zero) {
+                    hiddenFound = hWnd;
+                }
             }
             return true;
         }, IntPtr.Zero);
-        return found;
+        return visibleFound != IntPtr.Zero ? visibleFound : hiddenFound;
     }
 }
 `.trim()
