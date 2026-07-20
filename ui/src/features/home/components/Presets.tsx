@@ -169,6 +169,91 @@ export default function Presets() {
     }
   }
 
+  const renderPresetForm = (groupId: string, wrapperClassName: string) => (
+    <div className={`flex flex-col gap-2 px-3 py-2.5 dark:bg-green-950/20 ${wrapperClassName}`}>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handlePickIcon}
+          className="cursor-pointer flex h-8 w-8 p-0.5 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
+          aria-label="Choose preset icon"
+        >
+          {iconDraft ? (
+            <img src={iconDraft} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <ImagePlus className="h-4 w-4" />
+          )}
+        </button>
+
+        <input
+          type="text"
+          value={titleDraft}
+          onChange={(event) => setTitleDraft(event.target.value)}
+          onKeyDown={(event) => event.key === 'Enter' && handleSave(groupId)}
+          placeholder="Preset name"
+          className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
+          Width
+          <input
+            type="number"
+            value={widthDraft}
+            onChange={(event) => setWidthDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && handleSave(groupId)}
+            placeholder="Width"
+            className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
+          Height
+          <input
+            type="number"
+            value={heightDraft}
+            onChange={(event) => setHeightDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && handleSave(groupId)}
+            placeholder="Height"
+            className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
+          X
+          <input
+            type="number"
+            value={xDraft}
+            onChange={(event) => setXDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && handleSave(groupId)}
+            placeholder="X"
+            className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
+          Y
+          <input
+            type="number"
+            value={yDraft}
+            onChange={(event) => setYDraft(event.target.value)}
+            onKeyDown={(event) => event.key === 'Enter' && handleSave(groupId)}
+            placeholder="Y"
+            className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+          />
+        </label>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => handleSave(groupId)}
+        disabled={!titleDraft.trim()}
+        className="cursor-pointer flex items-center justify-center gap-2 rounded bg-green-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Check className="h-4 w-4" />
+        {editingItemId ? 'Save changes' : 'Save preset'}
+      </button>
+    </div>
+  )
+
   const handleSave = (groupId: string) => {
     if (!titleDraft.trim()) return
 
@@ -350,90 +435,10 @@ export default function Presets() {
               )}
             </div>
 
-            {!isCollapsed && formOpen && (
-              <div className="flex flex-col gap-2 rounded-lg border border-green-200 px-3 py-2.5 dark:border-green-800 dark:bg-green-950/20">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handlePickIcon}
-                    className="cursor-pointer flex h-8 w-8 p-0.5 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
-                    aria-label="Choose preset icon"
-                  >
-                    {iconDraft ? (
-                      <img src={iconDraft} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <ImagePlus className="h-4 w-4" />
-                    )}
-                  </button>
-
-                  <input
-                    type="text"
-                    value={titleDraft}
-                    onChange={(event) => setTitleDraft(event.target.value)}
-                    onKeyDown={(event) => event.key === 'Enter' && handleSave(group.id)}
-                    placeholder="Preset name"
-                    className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-                    Width
-                    <input
-                      type="number"
-                      value={widthDraft}
-                      onChange={(event) => setWidthDraft(event.target.value)}
-                      onKeyDown={(event) => event.key === 'Enter' && handleSave(group.id)}
-                      placeholder="Width"
-                      className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-                    Height
-                    <input
-                      type="number"
-                      value={heightDraft}
-                      onChange={(event) => setHeightDraft(event.target.value)}
-                      onKeyDown={(event) => event.key === 'Enter' && handleSave(group.id)}
-                      placeholder="Height"
-                      className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-                    X
-                    <input
-                      type="number"
-                      value={xDraft}
-                      onChange={(event) => setXDraft(event.target.value)}
-                      onKeyDown={(event) => event.key === 'Enter' && handleSave(group.id)}
-                      placeholder="X"
-                      className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-                    Y
-                    <input
-                      type="number"
-                      value={yDraft}
-                      onChange={(event) => setYDraft(event.target.value)}
-                      onKeyDown={(event) => event.key === 'Enter' && handleSave(group.id)}
-                      placeholder="Y"
-                      className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-                    />
-                  </label>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleSave(group.id)}
-                  disabled={!titleDraft.trim()}
-                  className="cursor-pointer flex items-center justify-center gap-2 rounded bg-green-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Check className="h-4 w-4" />
-                  {editingItemId ? 'Save changes' : 'Save preset'}
-                </button>
-              </div>
-            )}
+            {!isCollapsed &&
+              formOpen &&
+              !editingItemId &&
+              renderPresetForm(group.id, 'rounded-lg border border-green-200 dark:border-green-800')}
 
             {!isCollapsed && group.items.length === 0 && !formOpen && (
               <p className="rounded-lg border border-dashed border-green-300 px-4 py-4 text-center text-xs text-green-600 dark:border-green-800 dark:text-green-400">
@@ -444,41 +449,49 @@ export default function Presets() {
             {!isCollapsed && group.items.map((item) => (
               <div
                 key={item.id}
-                draggable
-                onDragStart={(event) => handleDragStart(event, item)}
-                className="flex shrink-0 cursor-grab items-center gap-3 overflow-hidden rounded-lg border border-green-200 bg-white px-3 py-2.5 active:cursor-grabbing dark:border-green-800 dark:bg-green-900/30"
+                className="flex shrink-0 flex-col overflow-hidden rounded-lg border border-green-200 bg-white dark:border-green-800 dark:bg-green-900/30"
               >
-                {item.iconDataUrl ? (
-                  <img src={item.iconDataUrl} alt="" className="h-7 w-7 shrink-0 rounded object-cover" />
-                ) : (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-green-100 text-xs font-semibold text-green-700 dark:bg-green-800 dark:text-green-200">
-                    {initials(item.title)}
-                  </span>
-                )}
+                <div
+                  draggable
+                  onDragStart={(event) => handleDragStart(event, item)}
+                  className="flex cursor-grab items-center gap-3 px-3 py-2.5 active:cursor-grabbing"
+                >
+                  {item.iconDataUrl ? (
+                    <img src={item.iconDataUrl} alt="" className="h-7 w-7 shrink-0 rounded object-cover" />
+                  ) : (
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-green-100 text-xs font-semibold text-green-700 dark:bg-green-800 dark:text-green-200">
+                      {initials(item.title)}
+                    </span>
+                  )}
 
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-green-950 dark:text-green-50">{item.title}</p>
-                  <p className="truncate text-xs text-green-600 dark:text-green-400">
-                    {item.width}×{item.height} at ({item.x}, {item.y})
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-green-950 dark:text-green-50">{item.title}</p>
+                    <p className="truncate text-xs text-green-600 dark:text-green-400">
+                      {item.width}×{item.height} at ({item.x}, {item.y})
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleEditStart(group.id, item)}
+                    className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+                    aria-label="Edit preset"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteItem(group.id, item.id)}
+                    className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+                    aria-label="Delete preset"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleEditStart(group.id, item)}
-                  className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-                  aria-label="Edit preset"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteItem(group.id, item.id)}
-                  className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-                  aria-label="Delete preset"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                {formOpen &&
+                  editingItemId === item.id &&
+                  renderPresetForm(group.id, 'border-t border-green-200 dark:border-green-800')}
               </div>
             ))}
           </div>
