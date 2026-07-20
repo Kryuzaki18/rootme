@@ -11,8 +11,8 @@ import {
   Upload,
   ChevronDown,
   ChevronRight,
-  Focus,
-  Minimize2
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { usePresetsStore, type PresetGroup, type PresetItem } from '../../../store/presetsStore'
 import { initials, INSTANCE_DRAG_MIME } from '../../../util'
@@ -590,7 +590,7 @@ export default function Presets() {
                   className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
                   aria-label={isGroupFocused ? 'Send group to tray' : 'Focus group'}
                 >
-                  {isGroupFocused ? <Minimize2 className="h-4 w-4" /> : <Focus className="h-4 w-4" />}
+                  {isGroupFocused ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </button>
                 <button
                   type="button"
@@ -678,7 +678,7 @@ export default function Presets() {
                     className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-800"
                     aria-label={isItemFocused ? 'Send to tray' : 'Focus'}
                   >
-                    {isItemFocused ? <Minimize2 className="h-4 w-4" /> : <Focus className="h-4 w-4" />}
+                    {isItemFocused ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
                   <button
                     type="button"
