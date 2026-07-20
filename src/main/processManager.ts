@@ -60,6 +60,13 @@ const WIN32_TYPE_DEF = `
 using System;
 using System.Runtime.InteropServices;
 
+public struct RECT {
+    public int Left;
+    public int Top;
+    public int Right;
+    public int Bottom;
+}
+
 public static class RootMeWin32 {
     public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
@@ -86,6 +93,12 @@ public static class RootMeWin32 {
 
     [DllImport("user32.dll")]
     public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
     public static IntPtr FindMainWindow(uint pid) {
         IntPtr found = IntPtr.Zero;
@@ -174,6 +187,68 @@ export async function setWindowTitle(pid: number, title: string): Promise<boolea
   ].join('\n')
 
   const result = await runWin32Script(pid, body, { ROOTME_TARGET_TITLE: title })
+  return result.toLowerCase() === 'true'
+}
+
+export interface WindowBounds {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export async function getWindowBounds(pid: number): Promise<WindowBounds | null> {
+  if (!Number.isInteger(pid)) return null
+
+  const body = [
+    'if ($hwnd -ne [IntPtr]::Zero) {',
+    '  $rect = New-Object RECT',
+    '  if ([RootMeWin32]::GetWindowRect($hwnd, [ref]$rect)) {',
+    '    Write-Output "$($rect.Left),$($rect.Top),$($rect.Right - $rect.Left),$($rect.Bottom - $rect.Top)"',
+    '  } else {',
+    '    Write-Output "False"',
+    '  }',
+    '} else {',
+    '  Write-Output "False"',
+    '}'
+  ].join('\n')
+
+  const result = await runWin32Script(pid, body)
+  if (result.toLowerCase() === 'false') return null
+
+  const [x, y, width, height] = result.split(',').map(Number)
+  if ([x, y, width, height].some((value) => !Number.isFinite(value))) return null
+
+  return { x, y, width, height }
+}
+
+const SWP_NOZORDER = 0x0004
+const SWP_NOACTIVATE = 0x0010
+
+export async function setWindowBounds(
+  pid: number,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): Promise<boolean> {
+  if (!Number.isInteger(pid)) return false
+
+  const body = [
+    'if ($hwnd -ne [IntPtr]::Zero) {',
+    `  $result = [RootMeWin32]::SetWindowPos($hwnd, [IntPtr]::Zero, [int]$env:ROOTME_X, [int]$env:ROOTME_Y, [int]$env:ROOTME_WIDTH, [int]$env:ROOTME_HEIGHT, ${SWP_NOZORDER | SWP_NOACTIVATE})`,
+    '  Write-Output $result',
+    '} else {',
+    '  Write-Output "False"',
+    '}'
+  ].join('\n')
+
+  const result = await runWin32Script(pid, body, {
+    ROOTME_X: String(Math.round(x)),
+    ROOTME_Y: String(Math.round(y)),
+    ROOTME_WIDTH: String(Math.round(width)),
+    ROOTME_HEIGHT: String(Math.round(height))
+  })
   return result.toLowerCase() === 'true'
 }
 

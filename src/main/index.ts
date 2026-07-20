@@ -6,7 +6,9 @@ import {
   setWindowVisibility,
   setWindowTitle,
   setWindowIcon,
-  focusWindow
+  focusWindow,
+  getWindowBounds,
+  setWindowBounds
 } from './processManager'
 
 function createWindow(): void {
@@ -48,6 +50,14 @@ function registerIpcHandlers(): void {
   )
 
   ipcMain.handle('processes:focus', (_event, pid: number) => focusWindow(pid))
+
+  ipcMain.handle('processes:getBounds', (_event, pid: number) => getWindowBounds(pid))
+
+  ipcMain.handle(
+    'processes:setBounds',
+    (_event, pid: number, x: number, y: number, width: number, height: number) =>
+      setWindowBounds(pid, x, y, width, height)
+  )
 
   ipcMain.handle('icon:pick', async () => {
     const win = BrowserWindow.getFocusedWindow()

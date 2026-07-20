@@ -7,6 +7,13 @@ export interface ProcessInstanceDto {
   memUsage: string
 }
 
+export interface WindowBoundsDto {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 const api = {
   verifyProcesses: (title: string): Promise<ProcessInstanceDto[]> =>
     ipcRenderer.invoke('processes:verify', title),
@@ -21,6 +28,12 @@ const api = {
     ipcRenderer.invoke('processes:setIcon', pid, iconDataUrl),
 
   focusWindow: (pid: number): Promise<boolean> => ipcRenderer.invoke('processes:focus', pid),
+
+  getWindowBounds: (pid: number): Promise<WindowBoundsDto | null> =>
+    ipcRenderer.invoke('processes:getBounds', pid),
+
+  setWindowBounds: (pid: number, x: number, y: number, width: number, height: number): Promise<boolean> =>
+    ipcRenderer.invoke('processes:setBounds', pid, x, y, width, height),
 
   pickIconFile: (): Promise<{ dataUrl: string } | null> => ipcRenderer.invoke('icon:pick')
 }
