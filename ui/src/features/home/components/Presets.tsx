@@ -116,8 +116,8 @@ export default function Presets() {
   }
 
   return (
-    <section className="flex w-100 shrink-0 flex-col gap-3">
-      <div className="flex items-center justify-between">
+    <section className="flex h-full w-100 shrink-0 flex-col gap-3">
+      <div className="flex shrink-0 items-center justify-between">
         <h2 className="text-sm font-semibold text-green-900 dark:text-green-100">Presets</h2>
         <div className="flex items-center gap-1">
           <input
@@ -154,19 +154,20 @@ export default function Presets() {
         </div>
       </div>
 
-      {groups.length === 0 && (
-        <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
-          No preset groups yet.
-        </p>
-      )}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+        {groups.length === 0 && (
+          <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
+            No preset groups yet.
+          </p>
+        )}
 
-      {groups.map((group) => {
-        const formOpen = openGroupId === group.id
+        {groups.map((group) => {
+          const formOpen = openGroupId === group.id
 
-        return (
+          return (
           <div
             key={group.id}
-            className="flex flex-col gap-2 rounded-lg border border-green-200 p-3 dark:border-green-800 dark:bg-green-950/10"
+            className="flex shrink-0 flex-col gap-2 rounded-lg border border-green-200 p-3 dark:border-green-800 dark:bg-green-950/10"
           >
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
@@ -297,7 +298,7 @@ export default function Presets() {
                 key={item.id}
                 draggable
                 onDragStart={(event) => handleDragStart(event, item)}
-                className="flex cursor-grab items-center gap-3 overflow-hidden rounded-lg border border-green-200 bg-white px-3 py-2.5 active:cursor-grabbing dark:border-green-800 dark:bg-green-900/30"
+                className="flex shrink-0 cursor-grab items-center gap-3 overflow-hidden rounded-lg border border-green-200 bg-white px-3 py-2.5 active:cursor-grabbing dark:border-green-800 dark:bg-green-900/30"
               >
                 {item.iconDataUrl ? (
                   <img src={item.iconDataUrl} alt="" className="h-7 w-7 shrink-0 rounded object-cover" />
@@ -333,8 +334,9 @@ export default function Presets() {
               </div>
             ))}
           </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </section>
   )
 }

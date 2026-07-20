@@ -14,11 +14,11 @@ export default function Home() {
   }
 
   return (
-    <main className="flex gap-10 p-5">
+    <main className="flex h-screen gap-10 p-5">
       <Presets />
 
-      <div className="flex flex-1 flex-col gap-6">
-        <div className="flex gap-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-6">
+        <div className="flex shrink-0 gap-3">
           <input
             type="text"
             value={title}
@@ -38,7 +38,7 @@ export default function Home() {
           </button>
         </div>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
           {hasSearched && !isLoading && instances.length === 0 && (
             <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
               No running instances match &ldquo;{title}&rdquo;.

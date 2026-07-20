@@ -99,7 +99,7 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`overflow-hidden rounded-lg border bg-white transition dark:bg-green-900/30 ${
+      className={`shrink-0 overflow-hidden rounded-lg border bg-white transition dark:bg-green-900/30 ${
         isDragOver
           ? 'border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
           : 'border-green-200 dark:border-green-800'
