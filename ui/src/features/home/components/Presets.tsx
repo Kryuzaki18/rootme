@@ -1,7 +1,6 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import {
   Plus,
-  ImagePlus,
   Check,
   X,
   Trash2,
@@ -25,6 +24,14 @@ import {
   PRESET_EXPORT_FILENAME,
   PRESET_GROUP_EXPORT_FILENAME_PREFIX,
 } from "../../../constants/preset.constant";
+import IconButton from "../../../components/IconButton";
+import IconPickerField from "./IconPickerField";
+import WindowBoundsFields from "./WindowBoundsFields";
+
+const ICON_BUTTON_CLASS =
+  "cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30";
+const ICON_BUTTON_DISABLED_CLASS =
+  "cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30";
 
 export default function Presets() {
   const {
@@ -344,22 +351,12 @@ export default function Presets() {
         className={`flex flex-col gap-2 px-3 py-2.5 dark:bg-green-950/20 ${wrapperClassName}`}
       >
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handlePickIcon}
+          <IconPickerField
+            iconDataUrl={iconDraft}
+            onPick={handlePickIcon}
+            ariaLabel="Choose preset icon"
             className="cursor-pointer flex h-8 w-8 p-0.5 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
-            aria-label="Choose preset icon"
-          >
-            {iconDraft ? (
-              <img
-                src={iconDraft}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <ImagePlus className="h-4 w-4" />
-            )}
-          </button>
+          />
 
           <input
             type="text"
@@ -388,15 +385,14 @@ export default function Presets() {
                   : "border-green-300 focus:border-green-500 focus:ring-green-100 dark:border-green-700 dark:focus:ring-green-800"
               }`}
             />
-            <button
-              type="button"
-              disabled={!!!pidDraft}
+            <IconButton
+              icon={X}
+              label="Clear PID"
               onClick={() => setPidDraft("")}
+              disabled={!pidDraft}
               className="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
-              aria-label="Clear PID"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+              iconClassName="h-3.5 w-3.5"
+            />
           </div>
           {isDuplicatePid && (
             <span className="text-red-500 dark:text-red-400">
@@ -405,60 +401,19 @@ export default function Presets() {
           )}
         </label>
 
-        <div className="grid grid-cols-2 gap-2">
-          <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-            Width
-            <input
-              type="number"
-              value={widthDraft}
-              onChange={(event) => setWidthDraft(event.target.value)}
-              onKeyDown={(event) =>
-                event.key === "Enter" && handleSave(groupId)
-              }
-              placeholder="Width"
-              className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-            Height
-            <input
-              type="number"
-              value={heightDraft}
-              onChange={(event) => setHeightDraft(event.target.value)}
-              onKeyDown={(event) =>
-                event.key === "Enter" && handleSave(groupId)
-              }
-              placeholder="Height"
-              className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-            X
-            <input
-              type="number"
-              value={xDraft}
-              onChange={(event) => setXDraft(event.target.value)}
-              onKeyDown={(event) =>
-                event.key === "Enter" && handleSave(groupId)
-              }
-              placeholder="X"
-              className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-            Y
-            <input
-              type="number"
-              value={yDraft}
-              onChange={(event) => setYDraft(event.target.value)}
-              onKeyDown={(event) =>
-                event.key === "Enter" && handleSave(groupId)
-              }
-              placeholder="Y"
-              className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-            />
-          </label>
-        </div>
+        <WindowBoundsFields
+          width={widthDraft}
+          height={heightDraft}
+          x={xDraft}
+          y={yDraft}
+          onWidthChange={setWidthDraft}
+          onHeightChange={setHeightDraft}
+          onXChange={setXDraft}
+          onYChange={setYDraft}
+          onEnter={() => handleSave(groupId)}
+          gridClassName="grid grid-cols-2 gap-2"
+          inputClassName="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+        />
 
         <button
           type="button"
@@ -522,31 +477,25 @@ export default function Presets() {
             className="hidden"
             onChange={handleImportChange}
           />
-          <button
-            type="button"
+          <IconButton
+            icon={Upload}
+            label="Import presets"
             onClick={handleImportClick}
-            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-            aria-label="Import presets"
-          >
-            <Upload className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
+            className={ICON_BUTTON_CLASS}
+          />
+          <IconButton
+            icon={Download}
+            label="Export presets"
             onClick={handleExportAll}
             disabled={groups.length === 0}
-            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
-            aria-label="Export presets"
-          >
-            <Download className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
+            className={ICON_BUTTON_DISABLED_CLASS}
+          />
+          <IconButton
+            icon={Plus}
+            label="Add preset group"
             onClick={() => addGroup()}
-            className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-            aria-label="Add preset group"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+            className={ICON_BUTTON_CLASS}
+          />
         </div>
       </div>
 
@@ -597,100 +546,74 @@ export default function Presets() {
                       autoFocus
                       className="flex-1 rounded border border-green-300 bg-white px-2 py-1 text-xs text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
                     />
-                    <button
-                      type="button"
+                    <IconButton
+                      icon={Check}
+                      label="Save group name"
                       onClick={() => handleRenameSave(group.id)}
-                      className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label="Save group name"
-                    >
-                      <Check className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
+                      className={ICON_BUTTON_CLASS}
+                      iconClassName="h-3.5 w-3.5"
+                    />
+                    <IconButton
+                      icon={X}
+                      label="Cancel rename"
                       onClick={handleRenameCancel}
-                      className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label="Cancel rename"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
+                      className={ICON_BUTTON_CLASS}
+                      iconClassName="h-3.5 w-3.5"
+                    />
                   </div>
                 ) : (
                   <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
-                    <button
-                      type="button"
+                    <IconButton
+                      icon={isCollapsed ? ChevronRight : ChevronDown}
+                      label={isCollapsed ? "Expand group" : "Collapse group"}
                       onClick={() => toggleGroupCollapse(group.id)}
                       className="shrink-0 cursor-pointer rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label={
-                        isCollapsed ? "Expand group" : "Collapse group"
-                      }
-                    >
-                      {isCollapsed ? (
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      ) : (
-                        <ChevronDown className="h-3.5 w-3.5" />
-                      )}
-                    </button>
+                      iconClassName="h-3.5 w-3.5"
+                    />
                     <FolderPlus className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">
                       {group.title || "Group"} ({group.items.length})
                     </span>
-                    <button
-                      type="button"
+                    <IconButton
+                      icon={Pencil}
+                      label="Rename group"
                       onClick={() => handleRenameStart(group)}
                       className="shrink-0 cursor-pointer rounded-full p-1 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label="Rename group"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </button>
+                      iconClassName="h-3 w-3"
+                    />
                   </span>
                 )}
 
                 {renamingGroupId !== group.id && (
                   <div className="flex shrink-0 items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleGroupFocusToggle(group)}
-                      disabled={groupPids.length === 0}
-                      className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label={
+                    <IconButton
+                      icon={isGroupFocused ? Eye : EyeOff}
+                      label={
                         isGroupFocused ? "Send group to tray" : "Focus group"
                       }
-                    >
-                      {isGroupFocused ? (
-                        <Eye className="h-4 w-4" />
-                      ) : (
-                        <EyeOff className="h-4 w-4" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
+                      onClick={() => handleGroupFocusToggle(group)}
+                      disabled={groupPids.length === 0}
+                      className={ICON_BUTTON_DISABLED_CLASS}
+                    />
+                    <IconButton
+                      icon={Download}
+                      label="Export group"
                       onClick={() => handleExportGroup(group)}
                       disabled={group.items.length === 0}
-                      className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label="Export group"
-                    >
-                      <Download className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
+                      className={ICON_BUTTON_DISABLED_CLASS}
+                    />
+                    <IconButton
+                      icon={formOpen ? X : Plus}
+                      label={formOpen ? "Cancel" : "Add preset item"}
                       onClick={() => handleItemFormToggle(group.id)}
-                      className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label={formOpen ? "Cancel" : "Add preset item"}
-                    >
-                      {formOpen ? (
-                        <X className="h-4 w-4" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
+                      className={ICON_BUTTON_CLASS}
+                    />
+                    <IconButton
+                      icon={Trash2}
+                      label="Delete group"
                       onClick={() => deleteGroup(group.id)}
-                      className="cursor-pointer rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-                      aria-label="Delete group"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                      className={ICON_BUTTON_CLASS}
+                    />
                   </div>
                 )}
               </div>
@@ -759,45 +682,31 @@ export default function Presets() {
                           </p>
                         </div>
 
-                        <button
-                          type="button"
+                        <IconButton
+                          icon={isItemFocused ? Eye : EyeOff}
+                          label={isItemFocused ? "Send to tray" : "Focus"}
                           onClick={() => handleItemFocusToggle(item)}
                           disabled={item.pid === undefined}
                           className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-800"
-                          aria-label={isItemFocused ? "Send to tray" : "Focus"}
-                        >
-                          {isItemFocused ? (
-                            <Eye className="h-4 w-4" />
-                          ) : (
-                            <EyeOff className="h-4 w-4" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
+                        />
+                        <IconButton
+                          icon={isEditingThisItem ? X : Pencil}
+                          label={
+                            isEditingThisItem ? "Cancel edit" : "Edit preset"
+                          }
                           onClick={() =>
                             isEditingThisItem
                               ? handleItemFormToggle(group.id)
                               : handleEditStart(group.id, item)
                           }
                           className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-                          aria-label={
-                            isEditingThisItem ? "Cancel edit" : "Edit preset"
-                          }
-                        >
-                          {isEditingThisItem ? (
-                            <X className="h-4 w-4" />
-                          ) : (
-                            <Pencil className="h-4 w-4" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
+                        />
+                        <IconButton
+                          icon={Trash2}
+                          label="Delete preset"
                           onClick={() => deleteItem(group.id, item.id)}
                           className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-                          aria-label="Delete preset"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        />
                       </div>
 
                       {isEditingThisItem &&

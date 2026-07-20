@@ -1,5 +1,5 @@
 import { useState, type DragEvent } from "react";
-import { Eye, EyeOff, Focus, Pencil, ImagePlus, Check, X, Copy } from "lucide-react";
+import { Eye, EyeOff, Focus, Pencil, Check, X, Copy } from "lucide-react";
 import {
   useAppInstancesStore,
   type AppInstance,
@@ -8,6 +8,9 @@ import type { PresetItem } from "../../../store/presetsStore";
 import { DRAG_MIME_TYPES } from "../../../constants/drag.constant";
 import { PID_COPIED_RESET_MS } from "../../../constants/ui.constant";
 import { parseWindowBoundsDraft } from "../../../util";
+import IconButton from "../../../components/IconButton";
+import IconPickerField from "./IconPickerField";
+import WindowBoundsFields from "./WindowBoundsFields";
 
 export default function AppInstanceRow({
   instance,
@@ -136,18 +139,13 @@ export default function AppInstanceRow({
         <div className="flex flex-col gap-1">
           <span className="flex items-center gap-1 font-mono text-[9px] text-green-700 dark:text-green-300">
             PID {instance.pid}
-            <button
-              type="button"
+            <IconButton
+              icon={pidCopied ? Check : Copy}
+              label="Copy PID"
               onClick={handleCopyPid}
               className="cursor-pointer rounded p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-              aria-label="Copy PID"
-            >
-              {pidCopied ? (
-                <Check className="h-2.5 w-2.5" />
-              ) : (
-                <Copy className="h-2.5 w-2.5" />
-              )}
-            </button>
+              iconClassName="h-2.5 w-2.5"
+            />
           </span>
           <span className="font-mono text-[9px] text-green-700 dark:text-green-300">
             Memory {instance.memUsage}
@@ -172,58 +170,38 @@ export default function AppInstanceRow({
         </div>
 
         <div className="ml-auto flex items-center gap-1">
-          <button
-            type="button"
+          <IconButton
+            icon={Focus}
+            label="Show and focus"
             onClick={() => focusInstance(instance.pid)}
             className="rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-            aria-label="Show and focus"
-          >
-            <Focus className="h-4 w-4" />
-          </button>
+          />
 
-          <button
-            type="button"
+          <IconButton
+            icon={instance.isVisible ? Eye : EyeOff}
+            label={instance.isVisible ? "Minimize" : "Show"}
             onClick={() => toggleVisibility(instance.pid)}
             className="rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-            aria-label={instance.isVisible ? "Minimize" : "Show"}
-          >
-            {instance.isVisible ? (
-              <Eye className="h-4 w-4" />
-            ) : (
-              <EyeOff className="h-4 w-4" />
-            )}
-          </button>
+          />
 
-          <button
-            type="button"
+          <IconButton
+            icon={Pencil}
+            label="Edit"
             onClick={handleEditToggle}
             className="rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
-            aria-label="Edit"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+          />
         </div>
       </div>
 
       {instance.isEditing && (
         <div className="flex flex-col gap-2 border-t border-green-200 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950/60">
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePickIcon}
+            <IconPickerField
+              iconDataUrl={iconDraft}
+              onPick={handlePickIcon}
+              ariaLabel="Update app icon"
               className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
-              aria-label="Update app icon"
-            >
-              {iconDraft ? (
-                <img
-                  src={iconDraft}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <ImagePlus className="h-4 w-4" />
-              )}
-            </button>
+            />
 
             <input
               type="text"
@@ -234,70 +212,33 @@ export default function AppInstanceRow({
               className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
             />
 
-            <button
-              type="button"
+            <IconButton
+              icon={Check}
+              label="Save"
               onClick={handleSave}
               className="rounded p-1.5 text-green-700 hover:bg-green-200 dark:text-green-300 dark:hover:bg-green-800"
-              aria-label="Save"
-            >
-              <Check className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
+            />
+            <IconButton
+              icon={X}
+              label="Cancel"
               onClick={() => toggleEdit(instance.pid)}
               className="rounded p-1.5 text-green-700 hover:bg-green-200 dark:text-green-300 dark:hover:bg-green-800"
-              aria-label="Cancel"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            />
           </div>
 
-          <div className="grid grid-cols-4 gap-2 pl-10">
-            <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-              Width
-              <input
-                type="number"
-                value={widthDraft}
-                onChange={(event) => setWidthDraft(event.target.value)}
-                onKeyDown={(event) => event.key === "Enter" && handleSave()}
-                placeholder="Width"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-              Height
-              <input
-                type="number"
-                value={heightDraft}
-                onChange={(event) => setHeightDraft(event.target.value)}
-                onKeyDown={(event) => event.key === "Enter" && handleSave()}
-                placeholder="Height"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-              X
-              <input
-                type="number"
-                value={xDraft}
-                onChange={(event) => setXDraft(event.target.value)}
-                onKeyDown={(event) => event.key === "Enter" && handleSave()}
-                placeholder="X"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
-              Y
-              <input
-                type="number"
-                value={yDraft}
-                onChange={(event) => setYDraft(event.target.value)}
-                onKeyDown={(event) => event.key === "Enter" && handleSave()}
-                placeholder="Y"
-                className="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
-              />
-            </label>
-          </div>
+          <WindowBoundsFields
+            width={widthDraft}
+            height={heightDraft}
+            x={xDraft}
+            y={yDraft}
+            onWidthChange={setWidthDraft}
+            onHeightChange={setHeightDraft}
+            onXChange={setXDraft}
+            onYChange={setYDraft}
+            onEnter={handleSave}
+            gridClassName="grid grid-cols-4 gap-2 pl-10"
+            inputClassName="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+          />
         </div>
       )}
     </div>

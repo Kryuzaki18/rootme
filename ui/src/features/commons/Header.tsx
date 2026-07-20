@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { STORAGE_KEYS } from "@/constants/storage.constant";
 import { APP_NAME, APP_TAGLINE } from "@/constants/app.constant";
+import IconButton from "@/components/IconButton";
 
 type Theme = "light" | "dark";
 
@@ -39,20 +40,15 @@ export default function Header() {
         </div>
       </div>
 
-      <button
-        type="button"
+      <IconButton
+        icon={theme === "dark" ? Sun : Moon}
+        label="Toggle theme"
         onClick={() =>
           setTheme((current) => (current === "dark" ? "light" : "dark"))
         }
-        className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-full  text-green-700 transition hover:bg-green-100  dark:text-green-300 dark:hover:bg-green-900/30"
-        aria-label="Toggle theme"
-      >
-        {theme === "dark" ? (
-          <Sun className="h-5 w-5" />
-        ) : (
-          <Moon className="h-5 w-5" />
-        )}
-      </button>
+        className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-full text-green-700 transition hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900/30"
+        iconClassName="h-5 w-5"
+      />
     </header>
   );
 }
