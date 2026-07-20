@@ -210,53 +210,62 @@ export default function Presets() {
     updateItemPid(groupId, item.id, instance.pid)
   }
 
-  const handleItemFocusToggle = async (item: PresetItem) => {
-    if (item.pid === undefined) return
-
-    const isFocused = focusedPids.has(item.pid)
-    const success = isFocused
-      ? await window.api.hideWindowToTray(item.pid)
-      : await window.api.focusWindow(item.pid)
-    if (!success) return
-
-    setFocusedPids((current) => {
-      const next = new Set(current)
-      if (isFocused) {
-        next.delete(item.pid!)
-      } else {
-        next.add(item.pid!)
-      }
-      return next
-    })
-  }
-
-  const handleGroupFocusToggle = async (group: PresetGroup) => {
-    const pids = group.items.map((item) => item.pid).filter((pid): pid is number => pid !== undefined)
-    if (pids.length === 0) return
-
-    const isGroupFocused = pids.every((pid) => focusedPids.has(pid))
-    const nextFocused = !isGroupFocused
-
-    for (const item of group.items) {
-      if (item.pid === undefined) continue
-
-      if (nextFocused) {
-        await window.api.focusWindow(item.pid)
-      } else {
-        await window.api.hideWindowToTray(item.pid)
-      }
-    }
-
+  // The underlying Win32 calls spawn a PowerShell process and can take a
+  // noticeable moment, so flip the UI immediately (optimistic update) and
+  // only revert it if the call turns out to have failed.
+  const setPidsFocused = (pids: number[], focused: boolean) => {
     setFocusedPids((current) => {
       const next = new Set(current)
       for (const pid of pids) {
-        if (nextFocused) {
+        if (focused) {
           next.add(pid)
         } else {
           next.delete(pid)
         }
       }
       return next
+    })
+  }
+
+  // Focusing also moves the window back to the preset's configured position/size,
+  // not just showing it — the two calls are independent so they run concurrently.
+  const focusItemAtPosition = (item: PresetItem & { pid: number }) =>
+    Promise.all([
+      window.api.focusWindow(item.pid),
+      window.api.setWindowBounds(item.pid, item.x, item.y, item.width, item.height)
+    ]).then(([focused]) => focused)
+
+  const handleItemFocusToggle = (item: PresetItem) => {
+    if (item.pid === undefined) return
+
+    const pid = item.pid
+    const nextFocused = !focusedPids.has(pid)
+
+    setPidsFocused([pid], nextFocused)
+
+    const request = nextFocused
+      ? focusItemAtPosition(item as PresetItem & { pid: number })
+      : window.api.hideWindowToTray(pid)
+    request.then((success) => {
+      if (!success) setPidsFocused([pid], !nextFocused)
+    })
+  }
+
+  const handleGroupFocusToggle = (group: PresetGroup) => {
+    const items = group.items.filter((item): item is PresetItem & { pid: number } => item.pid !== undefined)
+    if (items.length === 0) return
+
+    const isGroupFocused = items.every((item) => focusedPids.has(item.pid))
+    const nextFocused = !isGroupFocused
+    const pids = items.map((item) => item.pid)
+
+    setPidsFocused(pids, nextFocused)
+
+    Promise.all(
+      items.map((item) => (nextFocused ? focusItemAtPosition(item) : window.api.hideWindowToTray(item.pid)))
+    ).then((results) => {
+      const failedPids = pids.filter((_, index) => !results[index])
+      if (failedPids.length > 0) setPidsFocused(failedPids, !nextFocused)
     })
   }
 
