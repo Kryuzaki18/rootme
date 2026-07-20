@@ -10,7 +10,6 @@ export interface AppInstance {
   displayName: string
   iconDataUrl?: string
   isVisible: boolean
-  isCollapsed: boolean
   isEditing: boolean
 }
 
@@ -19,7 +18,6 @@ interface AppInstancesState {
   isLoading: boolean
   hasSearched: boolean
   verify: (title: string) => Promise<void>
-  toggleCollapse: (pid: number) => void
   toggleVisibility: (pid: number) => Promise<void>
   focusInstance: (pid: number) => Promise<void>
   toggleEdit: (pid: number) => void
@@ -46,14 +44,6 @@ export const useAppInstancesStore = create<AppInstancesState>((set, get) => ({
     }))
 
     set({ instances, isLoading: false })
-  },
-
-  toggleCollapse: (pid) => {
-    set({
-      instances: get().instances.map((instance) =>
-        instance.pid === pid ? { ...instance, isCollapsed: !instance.isCollapsed } : instance
-      )
-    })
   },
 
   toggleVisibility: async (pid) => {

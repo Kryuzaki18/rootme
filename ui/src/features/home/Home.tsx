@@ -38,6 +38,12 @@ export default function Home() {
           </button>
         </div>
 
+        {hasSearched && !isLoading && (
+          <p className="shrink-0 text-xs text-green-600 dark:text-green-400">
+            {instances.length} {instances.length === 1 ? 'result' : 'results'} found
+          </p>
+        )}
+
         <section className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
           {hasSearched && !isLoading && instances.length === 0 && (
             <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
