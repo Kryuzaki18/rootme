@@ -1,12 +1,13 @@
 import { useState, type DragEvent } from 'react'
 import { ChevronDown, ChevronRight, Eye, EyeOff, Focus, Pencil, ImagePlus, Check, X } from 'lucide-react'
 import { useAppInstancesStore, type AppInstance } from '../../../store/appInstancesStore'
-import { usePresetsStore, type Preset } from '../../../store/presetsStore'
+import { usePresetsStore, type PresetItem } from '../../../store/presetsStore'
 import { initials } from '../../../util'
 
 export default function AppInstanceRow({ instance }: { instance: AppInstance }) {
   const { toggleCollapse, toggleVisibility, focusInstance, toggleEdit, saveEdit } = useAppInstancesStore()
-  const savePreset = usePresetsStore((state) => state.savePreset)
+  const addGroup = usePresetsStore((state) => state.addGroup)
+  const addItem = usePresetsStore((state) => state.addItem)
   const [nameDraft, setNameDraft] = useState(instance.displayName)
   const [iconDraft, setIconDraft] = useState<string | undefined>(instance.iconDataUrl)
   const [widthDraft, setWidthDraft] = useState('')
@@ -49,7 +50,8 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
       window.api.setWindowBounds(instance.pid, x, y, width, height)
     }
 
-    savePreset({
+    const groupId = addGroup()
+    addItem(groupId, {
       title,
       iconDataUrl: iconDraft,
       width: hasValidBounds ? width : 0,
@@ -80,7 +82,7 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
     const raw = event.dataTransfer.getData('application/json')
     if (!raw) return
 
-    let preset: Preset
+    let preset: PresetItem
     try {
       preset = JSON.parse(raw)
     } catch {
