@@ -1,5 +1,17 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
-import { Plus, ImagePlus, Check, X, Trash2, Pencil, FolderPlus, Download, Upload } from 'lucide-react'
+import {
+  Plus,
+  ImagePlus,
+  Check,
+  X,
+  Trash2,
+  Pencil,
+  FolderPlus,
+  Download,
+  Upload,
+  ChevronDown,
+  ChevronRight
+} from 'lucide-react'
 import { usePresetsStore, type PresetGroup, type PresetItem } from '../../../store/presetsStore'
 import { initials, INSTANCE_DRAG_MIME } from '../../../util'
 
@@ -20,6 +32,7 @@ export default function Presets() {
   const [dragOverGroupId, setDragOverGroupId] = useState<string | null>(null)
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
+  const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(new Set())
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [titleDraft, setTitleDraft] = useState('')
   const [iconDraft, setIconDraft] = useState<string | undefined>(undefined)
@@ -52,6 +65,18 @@ export default function Presets() {
     setYDraft(String(item.y))
     setEditingItemId(item.id)
     setOpenGroupId(groupId)
+  }
+
+  const toggleGroupCollapse = (groupId: string) => {
+    setCollapsedGroupIds((current) => {
+      const next = new Set(current)
+      if (next.has(groupId)) {
+        next.delete(groupId)
+      } else {
+        next.add(groupId)
+      }
+      return next
+    })
   }
 
   const handleRenameStart = (group: PresetGroup) => {
@@ -223,6 +248,7 @@ export default function Presets() {
           const formOpen = openGroupId === group.id
 
           const isDragOver = dragOverGroupId === group.id
+          const isCollapsed = collapsedGroupIds.has(group.id)
 
           return (
           <div
@@ -271,9 +297,17 @@ export default function Presets() {
                 </div>
               ) : (
                 <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroupCollapse(group.id)}
+                    className="shrink-0 cursor-pointer rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                    aria-label={isCollapsed ? 'Expand group' : 'Collapse group'}
+                  >
+                    {isCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                  </button>
                   <FolderPlus className="h-3.5 w-3.5 shrink-0" />
                   <span className="truncate">
-                    {group.title || 'Group'}
+                    {group.title || 'Group'} ({group.items.length})
                   </span>
                   <button
                     type="button"
@@ -316,7 +350,7 @@ export default function Presets() {
               )}
             </div>
 
-            {formOpen && (
+            {!isCollapsed && formOpen && (
               <div className="flex flex-col gap-2 rounded-lg border border-green-200 px-3 py-2.5 dark:border-green-800 dark:bg-green-950/20">
                 <div className="flex items-center gap-2">
                   <button
@@ -401,13 +435,13 @@ export default function Presets() {
               </div>
             )}
 
-            {group.items.length === 0 && !formOpen && (
+            {!isCollapsed && group.items.length === 0 && !formOpen && (
               <p className="rounded-lg border border-dashed border-green-300 px-4 py-4 text-center text-xs text-green-600 dark:border-green-800 dark:text-green-400">
                 No presets in this group yet.
               </p>
             )}
 
-            {group.items.map((item) => (
+            {!isCollapsed && group.items.map((item) => (
               <div
                 key={item.id}
                 draggable
