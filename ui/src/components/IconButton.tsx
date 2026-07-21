@@ -25,7 +25,7 @@ export default function IconButton({
       className={className}
       aria-label={label}
     >
-      <Icon className={iconClassName} />
+      <Icon className={`cursor-pointer ${iconClassName}`} />
     </button>
   );
 }

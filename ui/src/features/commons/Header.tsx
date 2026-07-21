@@ -46,7 +46,7 @@ export default function Header() {
         onClick={() =>
           setTheme((current) => (current === "dark" ? "light" : "dark"))
         }
-        className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-full text-green-700 transition hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900/30"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-green-700 transition hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900/30"
         iconClassName="h-5 w-5"
       />
     </header>

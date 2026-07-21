@@ -155,7 +155,7 @@ export default function AppInstanceRow({
               icon={pidCopied ? Check : Copy}
               label="Copy PID"
               onClick={handleCopyPid}
-              className="cursor-pointer rounded p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+              className="rounded p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
               iconClassName="h-2.5 w-2.5"
             />
           </span>

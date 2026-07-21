@@ -24,7 +24,7 @@ export default function Home() {
     <main className="flex h-150 gap-10 p-5 pb-15">
       <Presets />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
         <div className="flex shrink-0 gap-1">
           <input
             type="text"
@@ -60,7 +60,7 @@ export default function Home() {
               Drag an item to Presets to save it
             </span>
 
-            <p className="text-xs text-green-600 dark:text-green-400">
+            <p className="text-[10px] text-green-600 dark:text-green-400">
               {instances.length} {instances.length === 1 ? 'result' : 'results'} found
             </p>
           </div>
