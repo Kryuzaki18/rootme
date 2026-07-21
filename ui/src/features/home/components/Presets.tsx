@@ -18,6 +18,7 @@ import {
   type PresetGroup,
   type PresetItem,
 } from "../../../store/presetsStore";
+import { useAppInstancesStore } from "../../../store/appInstancesStore";
 import {
   downloadJson,
   initials,
@@ -51,6 +52,7 @@ export default function Presets() {
     deleteItem,
     importGroups,
   } = usePresetsStore();
+  const { saveEdit } = useAppInstancesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
   const [dragOverGroupId, setDragOverGroupId] = useState<string | null>(null);
@@ -251,6 +253,8 @@ export default function Presets() {
     if (isPidTakenInGroup(groupId, instance.pid, item.id)) return;
 
     updateItemPid(groupId, item.id, instance.pid);
+    saveEdit(instance.pid, item.title, item.iconDataUrl);
+    window.api.setWindowBounds(instance.pid, item.x, item.y, item.width, item.height);
   };
 
   const setPidsFocused = (pids: number[], focused: boolean) => {
@@ -401,7 +405,7 @@ export default function Presets() {
               label="Clear PID"
               onClick={() => setPidDraft("")}
               disabled={!pidDraft}
-              className="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+              className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
               iconClassName="h-3.5 w-3.5"
             />
           </div>
@@ -583,7 +587,7 @@ export default function Presets() {
                       icon={isCollapsed ? ChevronRight : ChevronDown}
                       label={isCollapsed ? "Expand group" : "Collapse group"}
                       onClick={() => toggleGroupCollapse(group.id)}
-                      className="shrink-0 cursor-pointer rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                      className="shrink-0 rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
                       iconClassName="h-3.5 w-3.5"
                     />
                     <FolderPlus className="h-3.5 w-3.5 shrink-0" />
@@ -594,7 +598,7 @@ export default function Presets() {
                       icon={Pencil}
                       label="Rename group"
                       onClick={() => handleRenameStart(group)}
-                      className="shrink-0 cursor-pointer rounded-full p-1 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                      className="shrink-0 rounded-full p-1 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
                       iconClassName="h-3 w-3"
                     />
                   </span>
@@ -707,7 +711,7 @@ export default function Presets() {
                           label={isItemFocused ? "Send to tray" : "Focus"}
                           onClick={() => handleItemFocusToggle(item)}
                           disabled={item.pid === undefined}
-                          className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-800"
+                          className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-800"
                         />
                         <IconButton
                           icon={isEditingThisItem ? X : Pencil}
@@ -719,13 +723,13 @@ export default function Presets() {
                               ? handleItemFormToggle(group.id)
                               : handleEditStart(group.id, item)
                           }
-                          className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+                          className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
                         />
                         <IconButton
                           icon={Trash2}
                           label="Delete preset"
                           onClick={() => deleteItem(group.id, item.id)}
-                          className="cursor-pointer shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+                          className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
                         />
                       </div>
 
