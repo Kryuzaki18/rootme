@@ -87,6 +87,12 @@ export default function Presets() {
     resetDraft();
     setEditingItemId(null);
     setOpenGroupId((current) => (current === groupId ? null : groupId));
+    setCollapsedGroupIds((current) => {
+      if (!current.has(groupId)) return current;
+      const next = new Set(current);
+      next.delete(groupId);
+      return next;
+    });
   };
 
   const handleEditStart = (groupId: string, item: PresetItem) => {
