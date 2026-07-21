@@ -18,13 +18,19 @@ import {
   type PresetGroup,
   type PresetItem,
 } from "../../../store/presetsStore";
-import { downloadJson, initials, parseWindowBoundsDraft } from "../../../util";
+import {
+  downloadJson,
+  initials,
+  parseWindowBoundsDraft,
+  suppressDefaultDragImage,
+} from "../../../util";
 import { DRAG_MIME_TYPES } from "../../../constants/drag.constant";
 import {
   PRESET_EXPORT_FILENAME,
   PRESET_GROUP_EXPORT_FILENAME_PREFIX,
 } from "../../../constants/preset.constant";
 import IconButton from "../../../components/IconButton";
+import DragGhost from "../../../components/DragGhost";
 import IconPickerField from "./IconPickerField";
 import WindowBoundsFields from "./WindowBoundsFields";
 
@@ -130,6 +136,7 @@ export default function Presets() {
   ) => {
     event.dataTransfer.effectAllowed = "copy";
     event.dataTransfer.setData(DRAG_MIME_TYPES.PRESET_ITEM, JSON.stringify(item));
+    suppressDefaultDragImage(event);
     setDraggingItemId(item.id);
   };
 
@@ -234,8 +241,6 @@ export default function Presets() {
     event.preventDefault();
     event.stopPropagation();
 
-    if (item.pid !== undefined) return;
-
     let instance: { pid: number };
     try {
       instance = JSON.parse(raw);
@@ -243,7 +248,7 @@ export default function Presets() {
       return;
     }
 
-    if (isPidTakenInGroup(groupId, instance.pid)) return;
+    if (isPidTakenInGroup(groupId, instance.pid, item.id)) return;
 
     updateItemPid(groupId, item.id, instance.pid);
   };
@@ -469,7 +474,12 @@ export default function Presets() {
     setOpenGroupId(null);
   };
 
+  const draggingItem = groups
+    .flatMap((group) => group.items)
+    .find((item) => item.id === draggingItemId);
+
   return (
+    <>
     <section className="flex h-full w-100 shrink-0 flex-col gap-3">
       <div className="flex shrink-0 items-center justify-between">
         <h2 className="text-sm font-semibold text-green-900 dark:text-green-100">
@@ -533,7 +543,7 @@ export default function Presets() {
               onDrop={(event) => handleGroupDrop(event, group.id)}
               className={`flex shrink-0 flex-col gap-2 rounded-lg border p-3 transition dark:bg-green-950/10 ${
                 isDragOver
-                  ? "border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
+                  ? "border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
                   : "border-green-200 dark:border-green-800"
               }`}
             >
@@ -657,12 +667,10 @@ export default function Presets() {
                       onDragLeave={handleItemDragLeave}
                       onDrop={(event) => handleItemDrop(event, group.id, item)}
                       className={`flex shrink-0 flex-col overflow-hidden rounded-lg border bg-white transition duration-150 dark:bg-green-900/30 ${
-                        isItemDragging
-                          ? "-rotate-2 scale-[1.03] opacity-80 shadow-lg"
-                          : ""
+                        isItemDragging ? "opacity-40" : ""
                       } ${
                         isItemDragOver
-                          ? "border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
+                          ? "border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
                           : "border-green-200 dark:border-green-800"
                       }`}
                     >
@@ -734,5 +742,25 @@ export default function Presets() {
         })}
       </div>
     </section>
+
+    <DragGhost active={draggingItem !== undefined}>
+      <div className="flex max-w-60 items-center gap-2 rounded-lg border border-green-300 bg-white px-3 py-2 shadow-xl dark:border-green-600 dark:bg-green-900">
+        {draggingItem?.iconDataUrl ? (
+          <img
+            src={draggingItem.iconDataUrl}
+            alt=""
+            className="h-6 w-6 shrink-0 rounded object-cover"
+          />
+        ) : (
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-green-100 text-[10px] font-semibold text-green-700 dark:bg-green-800 dark:text-green-200">
+            {initials(draggingItem?.title ?? "")}
+          </span>
+        )}
+        <span className="truncate text-xs font-medium text-green-950 dark:text-green-50">
+          {draggingItem?.title}
+        </span>
+      </div>
+    </DragGhost>
+    </>
   );
 }

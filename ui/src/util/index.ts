@@ -39,3 +39,16 @@ export function downloadJson(filename: string, data: unknown): void {
   link.click()
   URL.revokeObjectURL(url)
 }
+
+const TRANSPARENT_PIXEL_GIF =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7'
+
+let transparentDragImage: HTMLImageElement | null = null
+
+export function suppressDefaultDragImage(event: { dataTransfer: DataTransfer }): void {
+  if (!transparentDragImage) {
+    transparentDragImage = new Image()
+    transparentDragImage.src = TRANSPARENT_PIXEL_GIF
+  }
+  event.dataTransfer.setDragImage(transparentDragImage, 0, 0)
+}

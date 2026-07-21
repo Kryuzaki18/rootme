@@ -7,8 +7,9 @@ import {
 import type { PresetItem } from "../../../store/presetsStore";
 import { DRAG_MIME_TYPES } from "../../../constants/drag.constant";
 import { PID_COPIED_RESET_MS } from "../../../constants/ui.constant";
-import { parseWindowBoundsDraft } from "../../../util";
+import { initials, parseWindowBoundsDraft, suppressDefaultDragImage } from "../../../util";
 import IconButton from "../../../components/IconButton";
+import DragGhost from "../../../components/DragGhost";
 import IconPickerField from "./IconPickerField";
 import WindowBoundsFields from "./WindowBoundsFields";
 
@@ -120,6 +121,7 @@ export default function AppInstanceRow({
         iconDataUrl: instance.iconDataUrl,
       }),
     );
+    suppressDefaultDragImage(event);
     setIsDragging(true);
   };
 
@@ -128,6 +130,7 @@ export default function AppInstanceRow({
   };
 
   return (
+    <>
     <div
       draggable
       onDragStart={handleInstanceDragStart}
@@ -137,10 +140,10 @@ export default function AppInstanceRow({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`row-enter shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition duration-150 active:cursor-grabbing dark:bg-green-900/30 ${
-        isDragging ? "rotate-2 scale-[1.03] opacity-80 shadow-lg" : ""
+        isDragging ? "opacity-40" : ""
       } ${
         isDragOver
-          ? "border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
+          ? "border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700"
           : "border-green-200 dark:border-green-800"
       }`}
     >
@@ -251,5 +254,25 @@ export default function AppInstanceRow({
         </div>
       )}
     </div>
+
+    <DragGhost active={isDragging}>
+      <div className="flex max-w-60 items-center gap-2 rounded-lg border border-green-300 bg-white px-3 py-2 shadow-xl dark:border-green-600 dark:bg-green-900">
+        {instance.iconDataUrl ? (
+          <img
+            src={instance.iconDataUrl}
+            alt=""
+            className="h-6 w-6 shrink-0 rounded object-cover"
+          />
+        ) : (
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-green-100 text-[10px] font-semibold text-green-700 dark:bg-green-800 dark:text-green-200">
+            {initials(instance.windowTitle || instance.displayName)}
+          </span>
+        )}
+        <span className="truncate text-xs font-medium text-green-950 dark:text-green-50">
+          {instance.windowTitle || instance.displayName}
+        </span>
+      </div>
+    </DragGhost>
+    </>
   );
 }
