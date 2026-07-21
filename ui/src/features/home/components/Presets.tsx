@@ -281,6 +281,9 @@ export default function Presets() {
         item.width,
         item.height,
       ),
+      item.iconDataUrl
+        ? window.api.setWindowIcon(item.pid, item.iconDataUrl)
+        : Promise.resolve(true),
     ]).then(([focused]) => focused);
 
   const handleItemFocusToggle = (item: PresetItem) => {
