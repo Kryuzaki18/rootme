@@ -30,6 +30,10 @@ import {
   PRESET_EXPORT_FILENAME,
   PRESET_GROUP_EXPORT_FILENAME_PREFIX,
 } from "../../../constants/preset.constant";
+import {
+  MAX_APP_TITLE_LENGTH,
+  MIN_APP_TITLE_LENGTH,
+} from "../../../constants/ui.constant";
 import IconButton from "../../../components/IconButton";
 import DragGhost from "../../../components/DragGhost";
 import IconPickerField from "./IconPickerField";
@@ -362,6 +366,10 @@ export default function Presets() {
   };
 
   const renderPresetForm = (groupId: string, wrapperClassName: string) => {
+    const trimmedTitle = titleDraft.trim();
+    const isInvalidTitleLength =
+      trimmedTitle.length < MIN_APP_TITLE_LENGTH ||
+      trimmedTitle.length > MAX_APP_TITLE_LENGTH;
     const trimmedPid = pidDraft.trim();
     const parsedPid = trimmedPid ? Number(trimmedPid) : undefined;
     const isInvalidPid = parsedPid !== undefined && !Number.isFinite(parsedPid);
@@ -388,6 +396,7 @@ export default function Presets() {
             onChange={(event) => setTitleDraft(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && handleSave(groupId)}
             placeholder="Preset name"
+            maxLength={MAX_APP_TITLE_LENGTH}
             className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
           />
         </div>
@@ -442,7 +451,7 @@ export default function Presets() {
         <button
           type="button"
           onClick={() => handleSave(groupId)}
-          disabled={!titleDraft.trim() || isDuplicatePid || isInvalidPid}
+          disabled={isInvalidTitleLength || isDuplicatePid || isInvalidPid}
           className="cursor-pointer flex items-center justify-center gap-2 rounded bg-green-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Check className="h-4 w-4" />
@@ -453,7 +462,12 @@ export default function Presets() {
   };
 
   const handleSave = (groupId: string) => {
-    if (!titleDraft.trim()) return;
+    const trimmedTitle = titleDraft.trim();
+    if (
+      trimmedTitle.length < MIN_APP_TITLE_LENGTH ||
+      trimmedTitle.length > MAX_APP_TITLE_LENGTH
+    )
+      return;
 
     const trimmedPid = pidDraft.trim();
     const parsedPid = trimmedPid ? Number(trimmedPid) : undefined;
@@ -467,7 +481,7 @@ export default function Presets() {
     const bounds = parseWindowBoundsDraft(widthDraft, heightDraft, xDraft, yDraft);
 
     const values = {
-      title: titleDraft.trim(),
+      title: trimmedTitle,
       iconDataUrl: iconDraft,
       pid: parsedPid,
       width: bounds?.width ?? 0,

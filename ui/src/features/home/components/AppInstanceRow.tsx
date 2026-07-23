@@ -6,7 +6,11 @@ import {
 } from "../../../store/appInstancesStore";
 import type { PresetItem } from "../../../store/presetsStore";
 import { DRAG_MIME_TYPES } from "../../../constants/drag.constant";
-import { PID_COPIED_RESET_MS } from "../../../constants/ui.constant";
+import {
+  MAX_APP_TITLE_LENGTH,
+  MIN_APP_TITLE_LENGTH,
+  PID_COPIED_RESET_MS,
+} from "../../../constants/ui.constant";
 import { initials, parseWindowBoundsDraft, suppressDefaultDragImage } from "../../../util";
 import IconButton from "../../../components/IconButton";
 import DragGhost from "../../../components/DragGhost";
@@ -63,8 +67,12 @@ export default function AppInstanceRow({
   };
 
   const handleSave = () => {
-    if (!nameDraft.trim()) return;
     const title = nameDraft.trim();
+    if (
+      title.length < MIN_APP_TITLE_LENGTH ||
+      title.length > MAX_APP_TITLE_LENGTH
+    )
+      return;
     saveEdit(instance.pid, title, iconDraft);
 
     const bounds = parseWindowBoundsDraft(widthDraft, heightDraft, xDraft, yDraft);
@@ -221,6 +229,7 @@ export default function AppInstanceRow({
               onChange={(event) => setNameDraft(event.target.value)}
               onKeyDown={(event) => event.key === "Enter" && handleSave()}
               placeholder="Update app name"
+              maxLength={MAX_APP_TITLE_LENGTH}
               className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
             />
 
