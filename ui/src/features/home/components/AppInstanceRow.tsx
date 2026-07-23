@@ -175,8 +175,8 @@ export default function AppInstanceRow({
               <span className="font-normal">{instance.windowTitle}</span>
             </div>
           ) : (
-            <span className="font-normal">
-              {instance.windowTitle} | {instance.imageName}
+            <span className="font-normal text-xs">
+              {instance.windowTitle} ({instance.imageName})
             </span>
           )}
         </div>
