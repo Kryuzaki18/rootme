@@ -215,7 +215,7 @@ export default function AppInstanceRow({
 
       {instance.isEditing && (
         <div className="flex flex-col gap-2 border-t border-green-200 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950/60">
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2">
             <IconPickerField
               iconDataUrl={iconDraft}
               onPick={handlePickIcon}
@@ -223,15 +223,20 @@ export default function AppInstanceRow({
               className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
             />
 
-            <input
-              type="text"
-              value={nameDraft}
-              onChange={(event) => setNameDraft(event.target.value)}
-              onKeyDown={(event) => event.key === "Enter" && handleSave()}
-              placeholder="Update app name"
-              maxLength={MAX_APP_TITLE_LENGTH}
-              className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
-            />
+            <div className="flex flex-1 flex-col gap-0.5">
+              <input
+                type="text"
+                value={nameDraft}
+                onChange={(event) => setNameDraft(event.target.value)}
+                onKeyDown={(event) => event.key === "Enter" && handleSave()}
+                placeholder="Update app name"
+                maxLength={MAX_APP_TITLE_LENGTH}
+                className="w-full rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+              />
+              <span className="self-end text-[10px] text-green-600 dark:text-green-400">
+                {nameDraft.trim().length}/{MAX_APP_TITLE_LENGTH}
+              </span>
+            </div>
 
             <IconButton
               icon={Check}

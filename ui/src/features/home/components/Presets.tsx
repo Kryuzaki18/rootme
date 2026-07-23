@@ -382,7 +382,7 @@ export default function Presets() {
       <div
         className={`flex flex-col gap-2 px-3 py-2.5 dark:bg-green-950/20 ${wrapperClassName}`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
           <IconPickerField
             iconDataUrl={iconDraft}
             onPick={handlePickIcon}
@@ -390,15 +390,20 @@ export default function Presets() {
             className="cursor-pointer flex h-8 w-8 p-0.5 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
           />
 
-          <input
-            type="text"
-            value={titleDraft}
-            onChange={(event) => setTitleDraft(event.target.value)}
-            onKeyDown={(event) => event.key === "Enter" && handleSave(groupId)}
-            placeholder="Preset name"
-            maxLength={MAX_APP_TITLE_LENGTH}
-            className="flex-1 rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-          />
+          <div className="flex flex-1 flex-col gap-0.5">
+            <input
+              type="text"
+              value={titleDraft}
+              onChange={(event) => setTitleDraft(event.target.value)}
+              onKeyDown={(event) => event.key === "Enter" && handleSave(groupId)}
+              placeholder="Preset name"
+              maxLength={MAX_APP_TITLE_LENGTH}
+              className="w-full rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+            />
+            <span className="self-end text-[10px] text-green-600 dark:text-green-400">
+              {trimmedTitle.length}/{MAX_APP_TITLE_LENGTH}
+            </span>
+          </div>
         </div>
 
         <label className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
