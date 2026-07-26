@@ -55,8 +55,8 @@ export default function WindowBoundsFields({
       onChange: onHeightChange,
       copyable: true,
     },
-    { label: "X", value: x, onChange: onXChange, copyable: false },
-    { label: "Y", value: y, onChange: onYChange, copyable: false },
+    { label: "X", value: x, onChange: onXChange, copyable: true },
+    { label: "Y", value: y, onChange: onYChange, copyable: true },
   ];
 
   return (
