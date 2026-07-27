@@ -1,4 +1,4 @@
-import { DRAG_MIME_TYPES } from '../constants/drag.constant'
+import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
 
 export function stripExeSuffix(imageName: string): string {
   return imageName.replace(/\.exe$/i, '')

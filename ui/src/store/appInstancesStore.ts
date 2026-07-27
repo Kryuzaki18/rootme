@@ -1,8 +1,8 @@
 import { create } from 'zustand'
-import type { ProcessInstanceDto } from '../types/electron-api'
-import { stripExeSuffix } from '../util'
-import { STORAGE_KEYS } from '../constants/storage.constant'
-import { MAX_RECENT_SEARCHES } from '../constants/ui.constant'
+import type { ProcessInstanceDto } from '@/types/electron-api'
+import { stripExeSuffix } from '@/util'
+import { STORAGE_KEYS } from '@/constants/storage.constant'
+import { MAX_RECENT_SEARCHES } from '@/constants/ui.constant'
 
 export interface AppInstance {
   pid: number
@@ -92,7 +92,6 @@ export const useAppInstancesStore = create<AppInstancesState>((set, get) => ({
       displayName: stripExeSuffix(proc.imageName),
       iconDataUrl: undefined,
       isVisible: true,
-      isCollapsed: true,
       isEditing: false
     }))
 

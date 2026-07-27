@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { STORAGE_KEYS } from '../constants/storage.constant'
+import { STORAGE_KEYS } from '@/constants/storage.constant'
 
 export interface PresetItem {
   id: string

@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Search, Loader2, MoveLeft, Clock, X } from 'lucide-react'
-import { useAppInstancesStore } from '../../store/appInstancesStore'
+import { Search, Loader2, MoveLeft } from 'lucide-react'
+import { useAppInstancesStore } from '@/store/appInstancesStore'
+import { SKELETON_ROW_COUNT } from '@/constants/ui.constant'
 import AppInstanceRow from './components/AppInstanceRow'
 import AppInstanceRowSkeleton from './components/AppInstanceRowSkeleton'
 import Presets from './components/Presets'
-import { SKELETON_ROW_COUNT } from '../../constants/ui.constant'
+import RecentSearchesDropdown from './components/RecentSearchesDropdown'
 
 export default function Home() {
   const [title, setTitle] = useState('')
@@ -55,54 +56,12 @@ export default function Home() {
             />
 
             {showRecentSearches && recentSearches.length > 0 && (
-              <ul className="absolute top-full left-0 z-10 mt-1 w-full overflow-hidden rounded-lg border border-green-200 bg-white shadow-lg dark:border-green-800 dark:bg-green-950">
-                <li className="flex items-center justify-between gap-2 border-b border-green-100 px-4 py-1.5 dark:border-green-800">
-                  <span className="text-[10px] font-semibold tracking-wide text-green-500 uppercase dark:text-green-500">
-                    Recent Searches
-                  </span>
-                  <button
-                    type="button"
-                    onClick={clearRecentSearches}
-                    className="cursor-pointer text-[10px] font-medium text-green-600 hover:underline dark:text-green-400"
-                  >
-                    Clear Recent Searches
-                  </button>
-                </li>
-                {recentSearches.map((entry) => (
-                  <li
-                    key={entry.term}
-                    className="flex items-center gap-1 px-2 py-1 transition hover:bg-green-50 dark:hover:bg-green-900/40"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => handleRecentSearchSelect(entry.term)}
-                      className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 px-2 py-1 text-left"
-                    >
-                      <Clock className="h-3.5 w-3.5 shrink-0 text-green-500 dark:text-green-500" />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-green-800 dark:text-green-200">
-                          {entry.term}
-                        </span>
-                        <span className="block truncate text-[10px] text-green-500 dark:text-green-500">
-                          {entry.appNames.length > 0 ? entry.appNames.join(', ') : 'No matching app'} ·{' '}
-                          {new Date(entry.timestamp).toLocaleString()}
-                        </span>
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        removeRecentSearch(entry.term)
-                      }}
-                      aria-label={`Remove ${entry.term} from recent searches`}
-                      className="shrink-0 cursor-pointer rounded-full p-1 text-green-400 transition hover:bg-green-100 hover:text-green-700 dark:hover:bg-green-800 dark:hover:text-green-200"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <RecentSearchesDropdown
+                entries={recentSearches}
+                onSelect={handleRecentSearchSelect}
+                onRemove={removeRecentSearch}
+                onClearAll={clearRecentSearches}
+              />
             )}
           </div>
           <button
