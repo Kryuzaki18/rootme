@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Focus, Pencil, Check, X, Copy } from 'lucide-react'
 import { useAppInstancesStore, type AppInstance } from '@/store/appInstancesStore'
-import type { PresetItem } from '@/store/presetsStore'
+import { usePresetsStore } from '@/store/presetsStore'
+import type { DraggedPresetItemPayload } from '@/types/drag'
 import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
 import { MAX_APP_TITLE_LENGTH, MIN_APP_TITLE_LENGTH } from '@/constants/ui.constant'
 import { ICON_BUTTON_COMPACT, ICON_BUTTON_EDIT_ACTION, ICON_BUTTON_ROW } from '@/constants/iconButton.constant'
@@ -18,6 +19,7 @@ import WindowBoundsFields from './WindowBoundsFields'
 
 export default function AppInstanceRow({ instance }: { instance: AppInstance }) {
   const { toggleVisibility, focusInstance, toggleEdit, saveEdit } = useAppInstancesStore()
+  const { groups, updateItemPid } = usePresetsStore()
   const [nameDraft, setNameDraft] = useState(instance.displayName)
   const [iconDraft, setIconDraft] = useState<string | undefined>(instance.iconDataUrl)
   const boundsDraft = useWindowBoundsDraft()
@@ -51,9 +53,14 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
     }
   }
 
-  const { isDragOver, dropHandlers } = useDropTarget<PresetItem>(DRAG_MIME_TYPES.PRESET_ITEM, (preset) => {
+  const { isDragOver, dropHandlers } = useDropTarget<DraggedPresetItemPayload>(DRAG_MIME_TYPES.PRESET_ITEM, (preset) => {
+    const group = groups.find((candidate) => candidate.id === preset.groupId)
+    const pidTaken = group?.items.some((other) => other.id !== preset.id && other.pid === instance.pid)
+    if (pidTaken) return
+
     saveEdit(instance.pid, preset.title, preset.iconDataUrl)
     window.api.setWindowBounds(instance.pid, preset.x, preset.y, preset.width, preset.height)
+    updateItemPid(preset.groupId, preset.id, instance.pid)
   })
 
   const { isDragging, dragHandlers } = useDragSource(DRAG_MIME_TYPES.APP_INSTANCE, () => ({

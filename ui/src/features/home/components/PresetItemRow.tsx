@@ -35,7 +35,7 @@ export default function PresetItemRow({
   const { updateItem, updateItemPid, deleteItem } = usePresetsStore()
   const { saveEdit } = useAppInstancesStore()
 
-  const { isDragging, dragHandlers } = useDragSource(DRAG_MIME_TYPES.PRESET_ITEM, () => item)
+  const { isDragging, dragHandlers } = useDragSource(DRAG_MIME_TYPES.PRESET_ITEM, () => ({ ...item, groupId }))
 
   const { isDragOver, dropHandlers } = useDropTarget<DraggedAppInstancePayload>(
     DRAG_MIME_TYPES.APP_INSTANCE,
