@@ -85,15 +85,18 @@ export default function PresetGroupCard({
     })
   })
 
-  const { isDragging, dragHandlers } = useDragSource(DRAG_MIME_TYPES.PRESET_GROUP, () => ({ groupId: group.id }))
+  const { isDragging, dragHandlers } = useDragSource(
+    DRAG_MIME_TYPES.PRESET_GROUP,
+    () => ({ groupId: group.id }),
+    'move'
+  )
 
   const { isDragOver: isGroupDragOver, dropHandlers: groupDropHandlers } = useDropTarget<DraggedPresetGroupPayload>(
     DRAG_MIME_TYPES.PRESET_GROUP,
     (payload) => reorderGroups(payload.groupId, group.id),
-    { stopPropagation: true }
+    { stopPropagation: true, dropEffect: 'move' }
   )
 
-  const isDragOver = isAppInstanceDragOver || isGroupDragOver
   const dropHandlers = {
     onDragOver: (event: DragEvent<HTMLDivElement>) => {
       appInstanceDropHandlers.onDragOver(event)
@@ -153,12 +156,14 @@ export default function PresetGroupCard({
     <>
       <div
         {...dropHandlers}
-        className={`flex shrink-0 flex-col gap-2 rounded-lg border p-3 transition dark:bg-green-950/10 ${
+        className={`flex shrink-0 scale-100 flex-col gap-2 rounded-lg border p-3 mt-0.5 transition-all duration-150 ease-out dark:bg-green-950/10 ${
           isDragging ? 'opacity-40' : ''
         } ${
-          isDragOver
-            ? 'border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
-            : 'border-green-200 dark:border-green-800'
+          isGroupDragOver
+            ? 'scale-[1.015] border-green-500 bg-green-50 shadow-lg shadow-green-500/10 ring-2 ring-green-400 dark:border-green-400 dark:bg-green-900/40 dark:ring-green-500'
+            : isAppInstanceDragOver
+              ? 'border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
+              : 'border-green-200 dark:border-green-800'
         }`}
       >
         <div className="flex items-center justify-between gap-2">
@@ -287,20 +292,25 @@ export default function PresetGroupCard({
           </p>
         )}
 
-        {!isCollapsed &&
-          group.items.map((item) => (
-            <PresetItemRow
-              key={item.id}
-              groupId={group.id}
-              item={item}
-              isEditing={editingItemId === item.id}
-              isFocused={isItemFocused(item)}
-              isPidTaken={isPidTaken}
-              onEditToggle={() => (editingItemId === item.id ? onCloseForm() : onEditStart(group.id, item.id))}
-              onDropSettled={closeDragOver}
-              onToggleFocus={() => toggleItemFocus(item)}
-            />
-          ))}
+        {!isCollapsed && group.items.length > 0 && (
+          // No gap here: each PresetItemRow supplies its own bottom padding as part of
+          // its drop-target hit box, so there's no dead zone between rows while reordering.
+          <div className="flex flex-col">
+            {group.items.map((item) => (
+              <PresetItemRow
+                key={item.id}
+                groupId={group.id}
+                item={item}
+                isEditing={editingItemId === item.id}
+                isFocused={isItemFocused(item)}
+                isPidTaken={isPidTaken}
+                onEditToggle={() => (editingItemId === item.id ? onCloseForm() : onEditStart(group.id, item.id))}
+                onDropSettled={closeDragOver}
+                onToggleFocus={() => toggleItemFocus(item)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <DragGhost active={isDragging}>

@@ -1,13 +1,17 @@
 import { useState, type DragEvent } from 'react'
 import { suppressDefaultDragImage } from '@/util'
 
-export function useDragSource<T>(mimeType: string, getPayload: () => T) {
+export function useDragSource<T>(
+  mimeType: string,
+  getPayload: () => T,
+  effectAllowed: DataTransfer['effectAllowed'] = 'copy'
+) {
   const [isDragging, setIsDragging] = useState(false)
 
   const dragHandlers = {
     draggable: true as const,
     onDragStart: (event: DragEvent<HTMLDivElement>) => {
-      event.dataTransfer.effectAllowed = 'copy'
+      event.dataTransfer.effectAllowed = effectAllowed
       event.dataTransfer.setData(mimeType, JSON.stringify(getPayload()))
       suppressDefaultDragImage(event)
       setIsDragging(true)

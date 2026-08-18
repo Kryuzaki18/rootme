@@ -24,6 +24,7 @@ interface PresetsState {
   deleteGroup: (groupId: string) => void
   renameGroup: (groupId: string, title: string) => void
   reorderGroups: (sourceGroupId: string, targetGroupId: string) => void
+  reorderItems: (groupId: string, sourceItemId: string, targetItemId: string) => void
   addItem: (groupId: string, item: Omit<PresetItem, 'id'>) => void
   updateItem: (groupId: string, itemId: string, item: Omit<PresetItem, 'id'>) => void
   updateItemPid: (groupId: string, itemId: string, pid: number) => void
@@ -94,6 +95,24 @@ export const usePresetsStore = create<PresetsState>((set, get) => ({
     const groups = [...current]
     const [moved] = groups.splice(sourceIndex, 1)
     groups.splice(targetIndex, 0, moved)
+    persistGroups(groups)
+    set({ groups })
+  },
+
+  reorderItems: (groupId, sourceItemId, targetItemId) => {
+    if (sourceItemId === targetItemId) return
+    const groups = get().groups.map((group) => {
+      if (group.id !== groupId) return group
+
+      const items = [...group.items]
+      const sourceIndex = items.findIndex((item) => item.id === sourceItemId)
+      const targetIndex = items.findIndex((item) => item.id === targetItemId)
+      if (sourceIndex === -1 || targetIndex === -1) return group
+
+      const [moved] = items.splice(sourceIndex, 1)
+      items.splice(targetIndex, 0, moved)
+      return { ...group, items }
+    })
     persistGroups(groups)
     set({ groups })
   },
