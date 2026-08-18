@@ -24,6 +24,7 @@ export default function IconButton({
       disabled={disabled}
       className={className}
       aria-label={label}
+      title={label}
     >
       <Icon className={`cursor-pointer ${iconClassName}`} />
     </button>

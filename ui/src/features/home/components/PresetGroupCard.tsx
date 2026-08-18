@@ -180,6 +180,7 @@ export default function PresetGroupCard({
                 {...dragHandlers}
                 role="button"
                 aria-label="Drag to reorder group"
+                title="Drag to reorder group"
                 className="shrink-0 cursor-grab p-0.5 text-green-400 active:cursor-grabbing dark:text-green-500"
               >
                 <GripVertical className="h-3.5 w-3.5" />

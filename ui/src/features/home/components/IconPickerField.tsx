@@ -14,7 +14,7 @@ export default function IconPickerField({
   className,
 }: IconPickerFieldProps) {
   return (
-    <button type="button" onClick={onPick} className={className} aria-label={ariaLabel}>
+    <button type="button" onClick={onPick} className={className} aria-label={ariaLabel} title={ariaLabel}>
       {iconDataUrl ? (
         <img src={iconDataUrl} alt="" className="h-full w-full object-cover" />
       ) : (
