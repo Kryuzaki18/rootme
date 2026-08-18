@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage } from 'electron'
 import { join, dirname } from 'path'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import {
   verifyProcesses,
   setWindowVisibility,
@@ -17,6 +17,14 @@ app.commandLine.appendSwitch('no-sandbox')
 
 let tray: Tray | null = null
 let isQuitting = false
+
+function resolveAppIconPath(): string | null {
+  const candidates = [
+    join(__dirname, '../../ui/public/rootme-logo.png'),
+    join(__dirname, '../renderer/rootme-logo.png')
+  ]
+  return candidates.find((candidate) => existsSync(candidate)) ?? null
+}
 
 function getIconPickerStateFile(): string {
   return join(app.getPath('userData'), 'icon-picker-state.json')
@@ -40,8 +48,10 @@ function writeLastIconDir(dir: string): void {
 }
 
 function createTray(mainWindow: BrowserWindow): Tray {
-  const icon = nativeImage.createFromPath(join(__dirname, '../../ui/public/rootme-logo.png'))
-  const trayIcon = new Tray(icon.isEmpty() ? icon : icon.resize({ width: 16, height: 16 }))
+  const iconPath = resolveAppIconPath()
+  const icon = iconPath ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty()
+ 
+  const trayIcon = new Tray(icon.isEmpty() ? icon : icon.resize({ width: 16, height: 16, quality: 'best' }))
   trayIcon.setToolTip('RootMe')
 
   const showWindow = (): void => {
@@ -69,7 +79,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     resizable: false,
     maximizable: false,
-    icon: join(__dirname, '../../ui/public/rootme-logo.png'),
+    icon: resolveAppIconPath() ?? undefined,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
