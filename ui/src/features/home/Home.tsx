@@ -39,7 +39,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex h-150 gap-10 p-5 pb-15">
+    <main className="flex min-h-0 flex-1 gap-10 p-5">
       <Presets />
 
       <div className="flex min-h-0 flex-1 flex-col gap-3">
