@@ -41,7 +41,7 @@ export default function WindowBoundsFields({
   return (
     <div className={gridClassName}>
       {fields.map((field) => (
-        <label key={field.label} className="flex flex-col gap-1 text-xs text-green-700 dark:text-green-400">
+        <label key={field.label} className="flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="flex items-center justify-between gap-1">
             {field.label}
             <IconButton
@@ -49,7 +49,7 @@ export default function WindowBoundsFields({
               label={`Copy ${field.label}`}
               onClick={() => copy(field.label, field.value)}
               disabled={!field.value.trim()}
-              className="rounded p-0.5 text-green-500 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-800"
+              className="rounded p-0.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-zinc-400 dark:text-zinc-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
               iconClassName="h-2.5 w-2.5"
             />
           </span>

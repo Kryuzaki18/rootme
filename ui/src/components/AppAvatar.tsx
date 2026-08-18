@@ -20,7 +20,7 @@ export default function AppAvatar({ iconDataUrl, label, size = 'md' }: AppAvatar
 
   return (
     <span
-      className={`flex shrink-0 items-center justify-center rounded bg-green-100 font-semibold text-green-700 dark:bg-green-800 dark:text-green-200 ${box} ${text}`}
+      className={`flex shrink-0 items-center justify-center rounded bg-zinc-100 font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 ${box} ${text}`}
     >
       {initials(label)}
     </span>

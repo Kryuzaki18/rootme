@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Search, Loader2, MoveLeft } from 'lucide-react'
+import { Search, Loader2, MoveLeft, X } from 'lucide-react'
 import { useAppInstancesStore } from '@/store/appInstancesStore'
 import { SKELETON_ROW_COUNT } from '@/constants/ui.constant'
+import IconButton from '@/components/IconButton'
 import AppInstanceRow from './components/AppInstanceRow'
 import AppInstanceRowSkeleton from './components/AppInstanceRowSkeleton'
 import Presets from './components/Presets'
@@ -52,8 +53,18 @@ export default function Home() {
               onFocus={() => setShowRecentSearches(true)}
               onBlur={() => setTimeout(() => setShowRecentSearches(false), 150)}
               placeholder="Enter app name (e.g. notepad)"
-              className="w-full rounded-lg border border-green-300 bg-white px-4 py-2.5 text-sm text-green-950 placeholder:text-green-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-800 dark:bg-green-900/40 dark:text-green-50 dark:placeholder:text-green-500 dark:focus:ring-green-700"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 pr-9 text-sm text-zinc-900 placeholder:text-zinc-400 transition-all duration-150 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:ring-red-900/50"
             />
+
+            {(title.trim() || hasSearched) && (
+              <IconButton
+                icon={X}
+                label="Clear"
+                onClick={handleClear}
+                className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded-full p-1.5 text-zinc-400 transition-all duration-150 hover:bg-red-50 hover:text-red-600 active:scale-90 dark:text-zinc-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                iconClassName="h-4 w-4"
+              />
+            )}
 
             {showRecentSearches && recentSearches.length > 0 && (
               <RecentSearchesDropdown
@@ -68,29 +79,21 @@ export default function Home() {
             type="button"
             onClick={() => handleVerify()}
             disabled={!title.trim() || isLoading}
-            className="cursor-pointer flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-800 dark:hover:bg-green-700"
+            className="flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-red-600/20 transition-all duration-150 hover:bg-red-700 hover:shadow-red-600/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none dark:bg-red-600 dark:hover:bg-red-500"
           >
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             Verify
-          </button>
-          <button
-            type="button"
-            onClick={handleClear}
-            disabled={!title.trim() && !hasSearched}
-            className="cursor-pointer rounded-lg px-3 py-2.5 text-sm font-medium text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-500 dark:hover:bg-green-900/30"
-          >
-            Clear
           </button>
         </div>
 
         {hasSearched && !isLoading && (
           <div className="flex shrink-0 items-center justify-between gap-3">
-            <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-600 dark:bg-green-900/20 dark:text-green-400">
+            <span className="flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400">
               <MoveLeft className="h-3 w-3 shrink-0" />
               Drag an item to Presets to save it
             </span>
 
-            <p className="text-[10px] text-green-600 dark:text-green-400">
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
               {instances.length} {instances.length === 1 ? 'result' : 'results'} found
             </p>
           </div>
@@ -98,7 +101,7 @@ export default function Home() {
 
         <section className="app-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto pr-1">
           {hasSearched && !isLoading && instances.length === 0 && (
-            <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
+            <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
               No running instances match &ldquo;{title}&rdquo;.
             </p>
           )}

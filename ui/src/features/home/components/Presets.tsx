@@ -8,7 +8,7 @@ import { usePresetFocus } from '@/hooks/usePresetFocus'
 import PresetGroupCard from './PresetGroupCard'
 
 const TOOLBAR_BUTTON =
-  'flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30'
+  'flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-zinc-500 transition-all duration-150 hover:bg-red-50 hover:text-red-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-zinc-500 disabled:active:scale-100 dark:text-zinc-400 dark:hover:bg-red-950/30 dark:hover:text-red-400'
 
 interface ActiveForm {
   groupId: string
@@ -59,7 +59,7 @@ export default function Presets() {
   return (
     <section className="flex h-full w-100 shrink-0 flex-col gap-3">
       <div className="flex shrink-0 items-center justify-between">
-        <h2 className="text-sm font-semibold text-green-900 dark:text-green-100">Presets</h2>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Presets</h2>
         <div className="flex items-center gap-1">
           <input
             ref={fileInputRef}
@@ -91,7 +91,7 @@ export default function Presets() {
 
       <div className="app-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto px-1.5">
         {groups.length === 0 && (
-          <p className="rounded-lg border border-dashed border-green-300 px-4 py-6 text-center text-sm text-green-600 dark:border-green-800 dark:text-green-400">
+          <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
             No preset groups yet.
           </p>
         )}

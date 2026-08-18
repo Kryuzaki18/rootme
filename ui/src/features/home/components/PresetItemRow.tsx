@@ -3,6 +3,7 @@ import { Eye, EyeOff, Pencil, Trash2, X } from 'lucide-react'
 import { usePresetsStore, type PresetItem } from '@/store/presetsStore'
 import { useAppInstancesStore } from '@/store/appInstancesStore'
 import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
+import { ICON_BUTTON_ROW } from '@/constants/iconButton.constant'
 import type { DraggedAppInstancePayload, DraggedPresetItemPayload } from '@/types/drag'
 import { useDragSource } from '@/hooks/useDragSource'
 import { useDropTarget } from '@/hooks/useDropTarget'
@@ -93,22 +94,22 @@ export default function PresetItemRow({
           hovering in the gap between item rows still counts as hovering this item. */}
       <div {...dropHandlers} className="shrink-0 pb-2 last:pb-0">
         <div
-          className={`flex scale-100 flex-col overflow-hidden rounded-lg border bg-white transition-all duration-150 ease-out dark:bg-green-900/30 ${
+          className={`flex scale-100 flex-col overflow-hidden rounded-lg border bg-white transition-all duration-150 ease-out dark:bg-zinc-900/40 ${
             isDragging ? 'opacity-40' : ''
           } ${
             isItemDragOver
-              ? 'scale-[1.015] border-green-500 bg-green-50 shadow-lg shadow-green-500/10 ring-2 ring-green-400 dark:border-green-400 dark:bg-green-900/60 dark:ring-green-500'
+              ? 'scale-[1.015] border-dashed border-red-500 bg-red-50 shadow-lg shadow-red-500/10 ring-2 ring-red-300 dark:border-red-400 dark:bg-red-950/30 dark:ring-red-700'
               : isAppInstanceDragOver
-                ? 'border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
-                : 'border-green-200 dark:border-green-800'
+                ? 'border-dashed border-red-500 ring-2 ring-red-300 dark:border-red-400 dark:ring-red-700'
+                : 'border-zinc-200 dark:border-zinc-800'
           }`}
         >
           <div {...dragHandlers} className="flex cursor-grab items-center gap-1 p-2 active:cursor-grabbing">
             <AppAvatar iconDataUrl={item.iconDataUrl} label={item.title} />
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-green-950 dark:text-green-50">{item.title}</p>
-              <p className="truncate text-[10px] text-green-600 dark:text-green-400">
+              <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">{item.title}</p>
+              <p className="truncate text-[10px] text-zinc-400 dark:text-zinc-500">
                 {item.pid !== undefined && `PID ${item.pid} - `}
                 {item.width}×{item.height} at ({item.x}, {item.y})
               </p>
@@ -119,19 +120,19 @@ export default function PresetItemRow({
               label={isFocused ? 'Send to tray' : 'Focus'}
               onClick={onToggleFocus}
               disabled={item.pid === undefined}
-              className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-800"
+              className={ICON_BUTTON_ROW}
             />
             <IconButton
               icon={isEditing ? X : Pencil}
               label={isEditing ? 'Cancel edit' : 'Edit preset'}
               onClick={onEditToggle}
-              className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+              className={ICON_BUTTON_ROW}
             />
             <IconButton
               icon={Trash2}
               label="Delete preset"
               onClick={() => deleteItem(groupId, item.id)}
-              className="shrink-0 rounded-full p-1.5 text-green-600 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-800"
+              className={ICON_BUTTON_ROW}
             />
           </div>
 
@@ -144,7 +145,7 @@ export default function PresetItemRow({
                 onEditToggle()
               }}
               onCancel={onEditToggle}
-              wrapperClassName="border-t border-green-200 dark:border-green-800"
+              wrapperClassName="border-t border-zinc-200 dark:border-zinc-800"
             />
           )}
         </div>

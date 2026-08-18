@@ -41,7 +41,7 @@ export default function ConfirmDialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-sm"
       onClick={onCancel}
     >
       <div
@@ -49,20 +49,20 @@ export default function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         onClick={(event) => event.stopPropagation()}
-        className="w-full max-w-sm rounded-xl border border-green-200 bg-white p-5 shadow-2xl dark:border-green-800 dark:bg-green-950"
+        className="animate-scale-in w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-5 shadow-2xl shadow-zinc-950/10 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/40"
       >
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400">
             {icon ?? <AlertTriangle className="h-5 w-5" />}
           </span>
           <div className="min-w-0 flex-1 pt-0.5">
             <h2
               id="confirm-dialog-title"
-              className="text-sm font-semibold text-green-950 dark:text-green-50"
+              className="text-sm font-semibold text-zinc-900 dark:text-zinc-50"
             >
               {title}
             </h2>
-            <p className="mt-1 text-xs leading-relaxed text-green-700 dark:text-green-400">
+            <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
               {description}
             </p>
           </div>
@@ -73,14 +73,14 @@ export default function ConfirmDialog({
             ref={cancelRef}
             type="button"
             onClick={onCancel}
-            className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-green-700 transition hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900/30"
+            className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-600 transition-all duration-150 hover:bg-zinc-100 active:scale-95 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="cursor-pointer rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-red-700"
+            className="cursor-pointer rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm shadow-red-600/30 transition-all duration-150 hover:bg-red-700 hover:shadow-red-600/40 active:scale-95"
           >
             {confirmLabel}
           </button>

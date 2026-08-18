@@ -25,18 +25,18 @@ export default function Header() {
   }, [theme]);
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-green-200 bg-green-50/30 px-6 py-4 backdrop-blur dark:border-green-900 dark:bg-gray-950/90">
+    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white/80 px-6 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90">
       <div className="flex items-center gap-3">
         <img
           src="./rootme-logo.png"
           alt={APP_NAME}
-          className="h-9 w-9 rounded-lg object-contain"
+          className="h-9 w-9 rounded-lg object-contain transition-transform duration-200 hover:scale-105"
         />
         <div>
-          <h1 className="text-lg font-semibold leading-tight text-green-900 dark:text-green-50">
+          <h1 className="text-lg font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
             {APP_NAME}
           </h1>
-          <p className="text-xs text-green-700 dark:text-green-400">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             {APP_TAGLINE}
           </p>
         </div>
@@ -49,14 +49,14 @@ export default function Header() {
           onClick={() =>
             setTheme((current) => (current === "dark" ? "light" : "dark"))
           }
-          className="flex h-9 w-9 items-center justify-center rounded-full text-green-700 transition hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900/30"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-all duration-150 hover:bg-red-50 hover:text-red-600 active:scale-90 dark:text-zinc-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
           iconClassName="h-5 w-5"
         />
         <IconButton
           icon={Power}
           label="Force Close"
           onClick={() => setIsForceCloseOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-red-600 transition hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-red-600 transition-all duration-150 hover:bg-red-50 active:scale-90 dark:text-red-400 dark:hover:bg-red-950/40"
           iconClassName="h-5 w-5"
         />
       </div>

@@ -3,7 +3,7 @@ import Home from './features/home/Home'
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-white text-green-950 dark:bg-gray-950 dark:text-green-50">
+    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
       <Header />
       <Home />
     </div>

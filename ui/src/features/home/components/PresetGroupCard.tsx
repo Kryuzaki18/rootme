@@ -156,14 +156,14 @@ export default function PresetGroupCard({
     <>
       <div
         {...dropHandlers}
-        className={`flex shrink-0 scale-100 flex-col gap-2 rounded-lg border p-3 mt-0.5 transition-all duration-150 ease-out dark:bg-green-950/10 ${
+        className={`flex shrink-0 scale-100 flex-col gap-2 rounded-lg border p-3 mt-0.5 transition-all duration-150 ease-out dark:bg-zinc-900/20 ${
           isDragging ? 'opacity-40' : ''
         } ${
           isGroupDragOver
-            ? 'scale-[1.015] border-green-500 bg-green-50 shadow-lg shadow-green-500/10 ring-2 ring-green-400 dark:border-green-400 dark:bg-green-900/40 dark:ring-green-500'
+            ? 'scale-[1.015] border-dashed border-red-500 bg-red-50 shadow-lg shadow-red-500/10 ring-2 ring-red-300 dark:border-red-400 dark:bg-red-950/30 dark:ring-red-700'
             : isAppInstanceDragOver
-              ? 'border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
-              : 'border-green-200 dark:border-green-800'
+              ? 'border-dashed border-red-500 ring-2 ring-red-300 dark:border-red-400 dark:ring-red-700'
+              : 'border-zinc-200 dark:border-zinc-800'
         }`}
       >
         <div className="flex items-center justify-between gap-2">
@@ -179,7 +179,7 @@ export default function PresetGroupCard({
                 }}
                 placeholder="Group name"
                 autoFocus
-                className="flex-1 rounded border border-green-300 bg-white px-2 py-1 text-xs text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+                className="flex-1 rounded border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-900 transition-colors focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:ring-red-900/50"
               />
               <IconButton
                 icon={Check}
@@ -197,13 +197,13 @@ export default function PresetGroupCard({
               />
             </div>
           ) : (
-            <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
+            <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
               <span
                 {...dragHandlers}
                 role="button"
                 aria-label="Drag to reorder group"
                 title="Drag to reorder group"
-                className="shrink-0 cursor-grab p-0.5 text-green-400 active:cursor-grabbing dark:text-green-500"
+                className="shrink-0 cursor-grab p-0.5 text-zinc-400 transition-colors active:cursor-grabbing hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400"
               >
                 <GripVertical className="h-3.5 w-3.5" />
               </span>
@@ -211,7 +211,7 @@ export default function PresetGroupCard({
                 icon={isCollapsed ? ChevronRight : ChevronDown}
                 label={isCollapsed ? 'Expand group' : 'Collapse group'}
                 onClick={() => setIsCollapsed((current) => !current)}
-                className="shrink-0 rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                className="shrink-0 rounded-full p-0.5 text-zinc-400 transition-all duration-150 hover:bg-red-50 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                 iconClassName="h-3.5 w-3.5"
               />
               <FolderPlus className="h-3.5 w-3.5 shrink-0" />
@@ -230,7 +230,7 @@ export default function PresetGroupCard({
                 className={ICON_BUTTON_TOOLBAR}
               />
               {isMenuOpen && (
-                <div className="absolute top-full right-0 z-20 mt-1 flex w-44 flex-col gap-0.5 rounded-lg border border-green-200 bg-white p-1 shadow-lg dark:border-green-800 dark:bg-green-950">
+                <div className="animate-dropdown-in absolute top-full right-0 z-20 mt-1 flex w-44 flex-col gap-0.5 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg shadow-zinc-950/10 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
                   {[
                     { icon: Pencil, label: 'Rename group', onClick: handleRenameStart },
                     {
@@ -254,15 +254,19 @@ export default function PresetGroupCard({
                         else handleToggleAddForm()
                       }
                     },
-                    { icon: Trash2, label: 'Delete group', onClick: handleDeleteGroup }
-                  ].map(({ icon: Icon, label, onClick, disabled }) => (
+                    { icon: Trash2, label: 'Delete group', onClick: handleDeleteGroup, danger: true }
+                  ].map(({ icon: Icon, label, onClick, disabled, danger }) => (
                     <button
                       key={label}
                       type="button"
                       onClick={onClick}
                       disabled={disabled}
                       title={label}
-                      className="flex w-full cursor-pointer items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-300 dark:hover:bg-green-900/30"
+                      className={`flex w-full cursor-pointer items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent ${
+                        danger
+                          ? 'text-red-600 hover:bg-red-50 disabled:hover:text-red-600 dark:text-red-400 dark:hover:bg-red-950/40 dark:disabled:hover:text-red-400'
+                          : 'text-zinc-600 hover:bg-red-50 hover:text-red-600 disabled:hover:text-zinc-600 dark:text-zinc-300 dark:hover:bg-red-950/30 dark:hover:text-red-400 dark:disabled:hover:text-zinc-300'
+                      }`}
                     >
                       <Icon className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate">{label}</span>
@@ -282,12 +286,12 @@ export default function PresetGroupCard({
               onCloseForm()
             }}
             onCancel={onCloseForm}
-            wrapperClassName="rounded-lg border border-green-200 dark:border-green-800"
+            wrapperClassName="rounded-lg border border-zinc-200 dark:border-zinc-800"
           />
         )}
 
         {!isCollapsed && group.items.length === 0 && !isFormOpen && (
-          <p className="rounded-lg border border-dashed border-green-300 px-4 py-4 text-center text-xs text-green-600 dark:border-green-800 dark:text-green-400">
+          <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-4 text-center text-xs text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
             No presets in this group yet.
           </p>
         )}

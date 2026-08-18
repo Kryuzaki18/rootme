@@ -74,17 +74,17 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
       <div
         {...dragHandlers}
         {...dropHandlers}
-        className={`row-enter shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition duration-150 active:cursor-grabbing dark:bg-green-900/30 ${
+        className={`row-enter shrink-0 cursor-grab overflow-hidden rounded-lg border bg-white transition-all duration-150 active:cursor-grabbing dark:bg-zinc-900/40 ${
           isDragging ? 'opacity-40' : ''
         } ${
           isDragOver
-            ? 'border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
-            : 'border-green-200 dark:border-green-800'
+            ? 'border-dashed border-red-500 ring-2 ring-red-300 dark:border-red-400 dark:ring-red-700'
+            : 'border-zinc-200 dark:border-zinc-800'
         }`}
       >
         <div className="flex items-center gap-10 px-4 py-3">
           <div className="flex flex-col gap-1">
-            <span className="flex items-center gap-1 font-mono text-[9px] text-green-700 dark:text-green-300">
+            <span className="flex items-center gap-1 font-mono text-[9px] text-zinc-400 dark:text-zinc-500">
               PID {instance.pid}
               <IconButton
                 icon={copiedKey === 'pid' ? Check : Copy}
@@ -94,7 +94,7 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
                 iconClassName="h-2.5 w-2.5"
               />
             </span>
-            <span className="font-mono text-[9px] text-green-700 dark:text-green-300">
+            <span className="font-mono text-[9px] text-zinc-400 dark:text-zinc-500">
               Memory {instance.memUsage}
             </span>
           </div>
@@ -103,10 +103,10 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
             {instance.iconDataUrl ? (
               <div className="flex items-center gap-2">
                 <img src={instance.iconDataUrl} alt="" className="h-7 w-7 rounded object-cover" />
-                <span className="font-normal">{instance.windowTitle}</span>
+                <span className="font-normal text-zinc-900 dark:text-zinc-50">{instance.windowTitle}</span>
               </div>
             ) : (
-              <span className="font-normal text-xs">
+              <span className="font-normal text-xs text-zinc-900 dark:text-zinc-50">
                 {instance.windowTitle} ({instance.imageName})
               </span>
             )}
@@ -132,13 +132,13 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
         </div>
 
         {instance.isEditing && (
-          <div className="flex flex-col gap-2 border-t border-green-200 bg-green-50 px-4 py-3 dark:border-green-800 dark:bg-green-950/60">
+          <div className="flex flex-col gap-2 border-t border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/60">
             <div className="flex gap-2">
               <IconPickerField
                 iconDataUrl={iconDraft}
                 onPick={handlePickIcon}
                 ariaLabel="Update app icon"
-                className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-green-400 text-green-600 hover:bg-green-100 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900"
+                className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-zinc-300 text-zinc-500 transition-colors hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-zinc-600 dark:text-zinc-400 dark:hover:border-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
               />
 
               <div className="flex flex-1 flex-col gap-0.5">
@@ -149,9 +149,9 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
                   onKeyDown={(event) => event.key === 'Enter' && handleSave()}
                   placeholder="Update app name"
                   maxLength={MAX_APP_TITLE_LENGTH}
-                  className="w-full rounded border border-green-300 bg-white px-3 py-1.5 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+                  className="w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 transition-colors focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:ring-red-900/50"
                 />
-                <span className="self-end text-[10px] text-green-600 dark:text-green-400">
+                <span className="self-end text-[10px] text-zinc-400 dark:text-zinc-500">
                   {nameDraft.trim().length}/{MAX_APP_TITLE_LENGTH}
                 </span>
               </div>
@@ -169,7 +169,7 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
               {...boundsDraft.fields}
               onEnter={handleSave}
               gridClassName="grid grid-cols-4 gap-2 pl-10"
-              inputClassName="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-300 dark:border-green-700 dark:bg-green-900/40 dark:text-green-50"
+              inputClassName="rounded border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 transition-colors focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:ring-red-900/50"
             />
           </div>
         )}
