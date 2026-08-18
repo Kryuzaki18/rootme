@@ -25,7 +25,7 @@ export function useDropTarget<T>(
       if (options.stopPropagation) event.stopPropagation()
       setIsDragOver(true)
     },
-    onDragLeave: () => setIsDragOver(false),
+    onDragLeave: (_event: DragEvent<HTMLDivElement>) => setIsDragOver(false),
     onDrop: (event: DragEvent<HTMLDivElement>) => {
       const raw = event.dataTransfer.getData(mimeType)
       setIsDragOver(false)

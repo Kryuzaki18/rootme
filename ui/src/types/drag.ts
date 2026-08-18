@@ -9,3 +9,7 @@ export interface DraggedAppInstancePayload {
 export interface DraggedPresetItemPayload extends PresetItem {
   groupId: string
 }
+
+export interface DraggedPresetGroupPayload {
+  groupId: string
+}

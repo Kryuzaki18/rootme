@@ -1,13 +1,29 @@
-import { useState } from 'react'
-import { Check, ChevronDown, ChevronRight, Download, Eye, EyeOff, FolderPlus, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { useState, type DragEvent } from 'react'
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  Eye,
+  EyeOff,
+  FolderPlus,
+  GripVertical,
+  Pencil,
+  Plus,
+  Trash2,
+  X
+} from 'lucide-react'
 import { usePresetsStore, type PresetGroup, type PresetItem } from '@/store/presetsStore'
 import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
 import { PRESET_GROUP_EXPORT_FILENAME_PREFIX } from '@/constants/preset.constant'
 import { ICON_BUTTON_TOOLBAR, ICON_BUTTON_TOOLBAR_DISABLED } from '@/constants/iconButton.constant'
-import type { DraggedAppInstancePayload } from '@/types/drag'
+import type { DraggedAppInstancePayload, DraggedPresetGroupPayload } from '@/types/drag'
 import { downloadJson } from '@/util'
+import { useDragSource } from '@/hooks/useDragSource'
 import { useDropTarget } from '@/hooks/useDropTarget'
 import IconButton from '@/components/IconButton'
+import DragGhost from '@/components/DragGhost'
+import DragPreviewCard from '@/components/DragPreviewCard'
 import PresetItemForm from './PresetItemForm'
 import PresetItemRow from './PresetItemRow'
 
@@ -36,7 +52,7 @@ export default function PresetGroupCard({
   isGroupFocused,
   toggleGroupFocus
 }: PresetGroupCardProps) {
-  const { deleteGroup, renameGroup, addItem } = usePresetsStore()
+  const { deleteGroup, renameGroup, addItem, reorderGroups } = usePresetsStore()
   const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed)
   const [isRenaming, setIsRenaming] = useState(false)
   const [renameDraft, setRenameDraft] = useState(group.title)
@@ -49,8 +65,8 @@ export default function PresetGroupCard({
     group.items.some((item) => item.id !== excludeItemId && item.pid === pid)
 
   const {
-    isDragOver,
-    dropHandlers,
+    isDragOver: isAppInstanceDragOver,
+    dropHandlers: appInstanceDropHandlers,
     close: closeDragOver
   } = useDropTarget<DraggedAppInstancePayload>(DRAG_MIME_TYPES.APP_INSTANCE, async (instance) => {
     const bounds = await window.api.getWindowBounds(instance.pid)
@@ -64,6 +80,34 @@ export default function PresetGroupCard({
       pid: isPidTaken(instance.pid) ? undefined : instance.pid
     })
   })
+
+  const { isDragging, dragHandlers } = useDragSource(DRAG_MIME_TYPES.PRESET_GROUP, () => ({ groupId: group.id }))
+
+  const { isDragOver: isGroupDragOver, dropHandlers: groupDropHandlers } = useDropTarget<DraggedPresetGroupPayload>(
+    DRAG_MIME_TYPES.PRESET_GROUP,
+    (payload) => reorderGroups(payload.groupId, group.id),
+    { stopPropagation: true }
+  )
+
+  const isDragOver = isAppInstanceDragOver || isGroupDragOver
+  const dropHandlers = {
+    onDragOver: (event: DragEvent<HTMLDivElement>) => {
+      appInstanceDropHandlers.onDragOver(event)
+      groupDropHandlers.onDragOver(event)
+    },
+    onDragEnter: (event: DragEvent<HTMLDivElement>) => {
+      appInstanceDropHandlers.onDragEnter(event)
+      groupDropHandlers.onDragEnter(event)
+    },
+    onDragLeave: (event: DragEvent<HTMLDivElement>) => {
+      appInstanceDropHandlers.onDragLeave(event)
+      groupDropHandlers.onDragLeave(event)
+    },
+    onDrop: (event: DragEvent<HTMLDivElement>) => {
+      appInstanceDropHandlers.onDrop(event)
+      groupDropHandlers.onDrop(event)
+    }
+  }
 
   const handleToggleAddForm = () => {
     onToggleAddForm(group.id)
@@ -89,130 +133,146 @@ export default function PresetGroupCard({
   const groupFocused = isGroupFocused(group)
 
   return (
-    <div
-      {...dropHandlers}
-      className={`flex shrink-0 flex-col gap-2 rounded-lg border p-3 transition dark:bg-green-950/10 ${
-        isDragOver
-          ? 'border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
-          : 'border-green-200 dark:border-green-800'
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        {isRenaming ? (
-          <div className="flex flex-1 items-center gap-1">
-            <input
-              type="text"
-              value={renameDraft}
-              onChange={(event) => setRenameDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') handleRenameSave()
-                if (event.key === 'Escape') setIsRenaming(false)
-              }}
-              placeholder="Group name"
-              autoFocus
-              className="flex-1 rounded border border-green-300 bg-white px-2 py-1 text-xs text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
-            />
-            <IconButton
-              icon={Check}
-              label="Save group name"
-              onClick={handleRenameSave}
-              className={ICON_BUTTON_TOOLBAR}
-              iconClassName="h-3.5 w-3.5"
-            />
-            <IconButton
-              icon={X}
-              label="Cancel rename"
-              onClick={() => setIsRenaming(false)}
-              className={ICON_BUTTON_TOOLBAR}
-              iconClassName="h-3.5 w-3.5"
-            />
-          </div>
-        ) : (
-          <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
-            <IconButton
-              icon={isCollapsed ? ChevronRight : ChevronDown}
-              label={isCollapsed ? 'Expand group' : 'Collapse group'}
-              onClick={() => setIsCollapsed((current) => !current)}
-              className="shrink-0 rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-              iconClassName="h-3.5 w-3.5"
-            />
-            <FolderPlus className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">
-              {group.title || 'Group'} ({group.items.length})
+    <>
+      <div
+        {...dropHandlers}
+        className={`flex shrink-0 flex-col gap-2 rounded-lg border p-3 transition dark:bg-green-950/10 ${
+          isDragging ? 'opacity-40' : ''
+        } ${
+          isDragOver
+            ? 'border-dashed border-green-500 ring-2 ring-green-300 dark:border-green-400 dark:ring-green-700'
+            : 'border-green-200 dark:border-green-800'
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          {isRenaming ? (
+            <div className="flex flex-1 items-center gap-1">
+              <input
+                type="text"
+                value={renameDraft}
+                onChange={(event) => setRenameDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') handleRenameSave()
+                  if (event.key === 'Escape') setIsRenaming(false)
+                }}
+                placeholder="Group name"
+                autoFocus
+                className="flex-1 rounded border border-green-300 bg-white px-2 py-1 text-xs text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
+              />
+              <IconButton
+                icon={Check}
+                label="Save group name"
+                onClick={handleRenameSave}
+                className={ICON_BUTTON_TOOLBAR}
+                iconClassName="h-3.5 w-3.5"
+              />
+              <IconButton
+                icon={X}
+                label="Cancel rename"
+                onClick={() => setIsRenaming(false)}
+                className={ICON_BUTTON_TOOLBAR}
+                iconClassName="h-3.5 w-3.5"
+              />
+            </div>
+          ) : (
+            <span className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
+              <span
+                {...dragHandlers}
+                role="button"
+                aria-label="Drag to reorder group"
+                className="shrink-0 cursor-grab p-0.5 text-green-400 active:cursor-grabbing dark:text-green-500"
+              >
+                <GripVertical className="h-3.5 w-3.5" />
+              </span>
+              <IconButton
+                icon={isCollapsed ? ChevronRight : ChevronDown}
+                label={isCollapsed ? 'Expand group' : 'Collapse group'}
+                onClick={() => setIsCollapsed((current) => !current)}
+                className="shrink-0 rounded-full p-0.5 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                iconClassName="h-3.5 w-3.5"
+              />
+              <FolderPlus className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">
+                {group.title || 'Group'} ({group.items.length})
+              </span>
+              <IconButton
+                icon={Pencil}
+                label="Rename group"
+                onClick={handleRenameStart}
+                className="shrink-0 rounded-full p-1 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
+                iconClassName="h-3 w-3"
+              />
             </span>
-            <IconButton
-              icon={Pencil}
-              label="Rename group"
-              onClick={handleRenameStart}
-              className="shrink-0 rounded-full p-1 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-              iconClassName="h-3 w-3"
-            />
-          </span>
+          )}
+
+          {!isRenaming && (
+            <div className="flex shrink-0 items-center gap-1">
+              <IconButton
+                icon={groupFocused ? Eye : EyeOff}
+                label={groupFocused ? 'Send group to tray' : 'Focus group'}
+                onClick={() => toggleGroupFocus(group)}
+                disabled={groupPids.length === 0}
+                className={ICON_BUTTON_TOOLBAR_DISABLED}
+              />
+              <IconButton
+                icon={Download}
+                label="Export group"
+                onClick={handleExportGroup}
+                disabled={group.items.length === 0}
+                className={ICON_BUTTON_TOOLBAR_DISABLED}
+              />
+              <IconButton
+                icon={isFormOpen ? X : Plus}
+                label={isFormOpen ? 'Cancel' : 'Add preset item'}
+                onClick={() => (isFormOpen ? onCloseForm() : handleToggleAddForm())}
+                className={ICON_BUTTON_TOOLBAR}
+              />
+              <IconButton
+                icon={Trash2}
+                label="Delete group"
+                onClick={() => deleteGroup(group.id)}
+                className={ICON_BUTTON_TOOLBAR}
+              />
+            </div>
+          )}
+        </div>
+
+        {!isCollapsed && isAddFormOpen && (
+          <PresetItemForm
+            isPidTaken={isPidTaken}
+            onSubmit={(values) => {
+              addItem(group.id, values)
+              onCloseForm()
+            }}
+            wrapperClassName="rounded-lg border border-green-200 dark:border-green-800"
+          />
         )}
 
-        {!isRenaming && (
-          <div className="flex shrink-0 items-center gap-1">
-            <IconButton
-              icon={groupFocused ? Eye : EyeOff}
-              label={groupFocused ? 'Send group to tray' : 'Focus group'}
-              onClick={() => toggleGroupFocus(group)}
-              disabled={groupPids.length === 0}
-              className={ICON_BUTTON_TOOLBAR_DISABLED}
-            />
-            <IconButton
-              icon={Download}
-              label="Export group"
-              onClick={handleExportGroup}
-              disabled={group.items.length === 0}
-              className={ICON_BUTTON_TOOLBAR_DISABLED}
-            />
-            <IconButton
-              icon={isFormOpen ? X : Plus}
-              label={isFormOpen ? 'Cancel' : 'Add preset item'}
-              onClick={() => (isFormOpen ? onCloseForm() : handleToggleAddForm())}
-              className={ICON_BUTTON_TOOLBAR}
-            />
-            <IconButton
-              icon={Trash2}
-              label="Delete group"
-              onClick={() => deleteGroup(group.id)}
-              className={ICON_BUTTON_TOOLBAR}
-            />
-          </div>
+        {!isCollapsed && group.items.length === 0 && !isFormOpen && (
+          <p className="rounded-lg border border-dashed border-green-300 px-4 py-4 text-center text-xs text-green-600 dark:border-green-800 dark:text-green-400">
+            No presets in this group yet.
+          </p>
         )}
+
+        {!isCollapsed &&
+          group.items.map((item) => (
+            <PresetItemRow
+              key={item.id}
+              groupId={group.id}
+              item={item}
+              isEditing={editingItemId === item.id}
+              isFocused={isItemFocused(item)}
+              isPidTaken={isPidTaken}
+              onEditToggle={() => (editingItemId === item.id ? onCloseForm() : onEditStart(group.id, item.id))}
+              onDropSettled={closeDragOver}
+              onToggleFocus={() => toggleItemFocus(item)}
+            />
+          ))}
       </div>
 
-      {!isCollapsed && isAddFormOpen && (
-        <PresetItemForm
-          isPidTaken={isPidTaken}
-          onSubmit={(values) => {
-            addItem(group.id, values)
-            onCloseForm()
-          }}
-          wrapperClassName="rounded-lg border border-green-200 dark:border-green-800"
-        />
-      )}
-
-      {!isCollapsed && group.items.length === 0 && !isFormOpen && (
-        <p className="rounded-lg border border-dashed border-green-300 px-4 py-4 text-center text-xs text-green-600 dark:border-green-800 dark:text-green-400">
-          No presets in this group yet.
-        </p>
-      )}
-
-      {!isCollapsed &&
-        group.items.map((item) => (
-          <PresetItemRow
-            key={item.id}
-            groupId={group.id}
-            item={item}
-            isEditing={editingItemId === item.id}
-            isFocused={isItemFocused(item)}
-            isPidTaken={isPidTaken}
-            onEditToggle={() => (editingItemId === item.id ? onCloseForm() : onEditStart(group.id, item.id))}
-            onDropSettled={closeDragOver}
-            onToggleFocus={() => toggleItemFocus(item)}
-          />
-        ))}
-    </div>
+      <DragGhost active={isDragging}>
+        <DragPreviewCard title={group.title || 'Group'} />
+      </DragGhost>
+    </>
   )
 }
