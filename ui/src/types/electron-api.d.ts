@@ -22,6 +22,7 @@ export interface ElectronApi {
   getWindowBounds: (pid: number) => Promise<WindowBoundsDto | null>
   setWindowBounds: (pid: number, x: number, y: number, width: number, height: number) => Promise<boolean>
   pickIconFile: () => Promise<{ dataUrl: string } | null>
+  forceQuit: () => Promise<void>
 }
 
 declare global {

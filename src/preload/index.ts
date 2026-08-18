@@ -37,7 +37,9 @@ const api = {
   setWindowBounds: (pid: number, x: number, y: number, width: number, height: number): Promise<boolean> =>
     ipcRenderer.invoke('processes:setBounds', pid, x, y, width, height),
 
-  pickIconFile: (): Promise<{ dataUrl: string } | null> => ipcRenderer.invoke('icon:pick')
+  pickIconFile: (): Promise<{ dataUrl: string } | null> => ipcRenderer.invoke('icon:pick'),
+
+  forceQuit: (): Promise<void> => ipcRenderer.invoke('app:forceQuit')
 }
 
 contextBridge.exposeInMainWorld('api', api)

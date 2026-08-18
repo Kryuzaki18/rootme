@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage } from 'electron'
 import { join, dirname } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
 import {
@@ -14,6 +14,9 @@ import {
 
 app.disableHardwareAcceleration()
 app.commandLine.appendSwitch('no-sandbox')
+
+let tray: Tray | null = null
+let isQuitting = false
 
 function getIconPickerStateFile(): string {
   return join(app.getPath('userData'), 'icon-picker-state.json')
@@ -36,6 +39,28 @@ function writeLastIconDir(dir: string): void {
   }
 }
 
+function createTray(mainWindow: BrowserWindow): Tray {
+  const icon = nativeImage.createFromPath(join(__dirname, '../../ui/public/rootme-logo.png'))
+  const trayIcon = new Tray(icon.isEmpty() ? icon : icon.resize({ width: 16, height: 16 }))
+  trayIcon.setToolTip('RootMe')
+
+  const showWindow = (): void => {
+    mainWindow.show()
+    mainWindow.focus()
+  }
+
+  trayIcon.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: 'Open RootMe', click: showWindow },
+      { type: 'separator' },
+      { label: 'Force Close', click: () => app.quit() }
+    ])
+  )
+  trayIcon.on('click', showWindow)
+
+  return trayIcon
+}
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -54,11 +79,21 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => mainWindow.show())
 
+  // Closing the window hides it to the tray instead of quitting, unless the
+  // user explicitly force-closed (tray menu or the in-app Force Close button).
+  mainWindow.on('close', (event) => {
+    if (isQuitting) return
+    event.preventDefault()
+    mainWindow.hide()
+  })
+
   if (process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  tray = createTray(mainWindow)
 }
 
 function registerIpcHandlers(): void {
@@ -85,6 +120,8 @@ function registerIpcHandlers(): void {
     (_event, pid: number, x: number, y: number, width: number, height: number) =>
       setWindowBounds(pid, x, y, width, height)
   )
+
+  ipcMain.handle('app:forceQuit', () => app.quit())
 
   ipcMain.handle('icon:pick', async () => {
     const win = BrowserWindow.getFocusedWindow()
@@ -119,6 +156,10 @@ void app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  isQuitting = true
 })
 
 app.on('window-all-closed', () => {

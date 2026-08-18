@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Power, Sun } from "lucide-react";
 import { STORAGE_KEYS } from "@/constants/storage.constant";
 import { APP_NAME, APP_TAGLINE } from "@/constants/app.constant";
 import IconButton from "@/components/IconButton";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 type Theme = "light" | "dark";
 
@@ -16,6 +17,7 @@ function getInitialTheme(): Theme {
 
 export default function Header() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [isForceCloseOpen, setIsForceCloseOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -40,14 +42,33 @@ export default function Header() {
         </div>
       </div>
 
-      <IconButton
-        icon={theme === "dark" ? Sun : Moon}
-        label="Toggle theme"
-        onClick={() =>
-          setTheme((current) => (current === "dark" ? "light" : "dark"))
-        }
-        className="flex h-9 w-9 items-center justify-center rounded-full text-green-700 transition hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900/30"
-        iconClassName="h-5 w-5"
+      <div className="flex items-center gap-1">
+        <IconButton
+          icon={theme === "dark" ? Sun : Moon}
+          label="Toggle theme"
+          onClick={() =>
+            setTheme((current) => (current === "dark" ? "light" : "dark"))
+          }
+          className="flex h-9 w-9 items-center justify-center rounded-full text-green-700 transition hover:bg-green-100 dark:text-green-300 dark:hover:bg-green-900/30"
+          iconClassName="h-5 w-5"
+        />
+        <IconButton
+          icon={Power}
+          label="Force Close"
+          onClick={() => setIsForceCloseOpen(true)}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-red-600 transition hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
+          iconClassName="h-5 w-5"
+        />
+      </div>
+
+      <ConfirmDialog
+        open={isForceCloseOpen}
+        title="Force close RootMe?"
+        description="This fully quits the app instead of minimizing it to the tray. Any running instances managed by RootMe will keep running."
+        confirmLabel="Force Close"
+        icon={<Power className="h-5 w-5" />}
+        onConfirm={() => window.api.forceQuit()}
+        onCancel={() => setIsForceCloseOpen(false)}
       />
     </header>
   );
