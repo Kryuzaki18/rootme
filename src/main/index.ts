@@ -74,7 +74,7 @@ function createTray(mainWindow: BrowserWindow): Tray {
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1200,
-    height: 670,
+    height: 800,
     show: false,
     autoHideMenuBar: true,
     resizable: false,
@@ -89,8 +89,6 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => mainWindow.show())
 
-  // Closing the window hides it to the tray instead of quitting, unless the
-  // user explicitly force-closed (tray menu or the in-app Force Close button).
   mainWindow.on('close', (event) => {
     if (isQuitting) return
     event.preventDefault()
