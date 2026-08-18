@@ -11,10 +11,17 @@ interface PresetItemFormProps {
   initialItem?: PresetItem
   isPidTaken: (pid: number, excludeItemId?: string) => boolean
   onSubmit: (values: Omit<PresetItem, 'id'>) => void
+  onCancel: () => void
   wrapperClassName: string
 }
 
-export default function PresetItemForm({ initialItem, isPidTaken, onSubmit, wrapperClassName }: PresetItemFormProps) {
+export default function PresetItemForm({
+  initialItem,
+  isPidTaken,
+  onSubmit,
+  onCancel,
+  wrapperClassName
+}: PresetItemFormProps) {
   const [titleDraft, setTitleDraft] = useState(initialItem?.title ?? '')
   const [iconDraft, setIconDraft] = useState<string | undefined>(initialItem?.iconDataUrl)
   const [pidDraft, setPidDraft] = useState(initialItem?.pid !== undefined ? String(initialItem.pid) : '')
@@ -111,16 +118,27 @@ export default function PresetItemForm({ initialItem, isPidTaken, onSubmit, wrap
         inputClassName="rounded border border-green-300 bg-white px-2 py-1 text-sm text-green-950 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-50"
       />
 
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={isInvalidTitleLength || isDuplicatePid || isInvalidPid}
-        title={initialItem ? 'Save changes' : 'Save preset'}
-        className="cursor-pointer flex items-center justify-center gap-2 rounded bg-green-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <Check className="h-4 w-4" />
-        {initialItem ? 'Save changes' : 'Save preset'}
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isInvalidTitleLength || isDuplicatePid || isInvalidPid}
+          title={initialItem ? 'Save changes' : 'Save preset'}
+          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded bg-green-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Check className="h-4 w-4" />
+          {initialItem ? 'Save changes' : 'Save preset'}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          title="Cancel"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded border border-green-300 px-3 py-1.5 text-sm font-medium text-green-700 transition hover:bg-green-100 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/30"
+        >
+          <X className="h-4 w-4" />
+          Cancel
+        </button>
+      </div>
     </div>
   )
 }

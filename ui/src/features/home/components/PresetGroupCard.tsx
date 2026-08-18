@@ -8,6 +8,7 @@ import {
   EyeOff,
   FolderPlus,
   GripVertical,
+  MoreHorizontal,
   Pencil,
   Plus,
   Trash2,
@@ -16,9 +17,10 @@ import {
 import { usePresetsStore, type PresetGroup, type PresetItem } from '@/store/presetsStore'
 import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
 import { PRESET_GROUP_EXPORT_FILENAME_PREFIX } from '@/constants/preset.constant'
-import { ICON_BUTTON_TOOLBAR, ICON_BUTTON_TOOLBAR_DISABLED } from '@/constants/iconButton.constant'
+import { ICON_BUTTON_TOOLBAR } from '@/constants/iconButton.constant'
 import type { DraggedAppInstancePayload, DraggedPresetGroupPayload } from '@/types/drag'
 import { downloadJson } from '@/util'
+import { useClickOutside } from '@/hooks/useClickOutside'
 import { useDragSource } from '@/hooks/useDragSource'
 import { useDropTarget } from '@/hooks/useDropTarget'
 import IconButton from '@/components/IconButton'
@@ -56,6 +58,8 @@ export default function PresetGroupCard({
   const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed)
   const [isRenaming, setIsRenaming] = useState(false)
   const [renameDraft, setRenameDraft] = useState(group.title)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useClickOutside<HTMLDivElement>(isMenuOpen, () => setIsMenuOpen(false))
 
   const isFormOpen = formState !== null
   const isAddFormOpen = formState !== null && formState.itemId === null
@@ -110,11 +114,13 @@ export default function PresetGroupCard({
   }
 
   const handleToggleAddForm = () => {
+    setIsMenuOpen(false)
     onToggleAddForm(group.id)
     setIsCollapsed(false)
   }
 
   const handleRenameStart = () => {
+    setIsMenuOpen(false)
     setRenameDraft(group.title)
     setIsRenaming(true)
   }
@@ -125,8 +131,19 @@ export default function PresetGroupCard({
   }
 
   const handleExportGroup = () => {
+    setIsMenuOpen(false)
     if (group.items.length === 0) return
     downloadJson(`${PRESET_GROUP_EXPORT_FILENAME_PREFIX}${group.id}.json`, [group])
+  }
+
+  const handleToggleFocus = () => {
+    setIsMenuOpen(false)
+    toggleGroupFocus(group)
+  }
+
+  const handleDeleteGroup = () => {
+    setIsMenuOpen(false)
+    deleteGroup(group.id)
   }
 
   const groupPids = group.items.map((item) => item.pid).filter((pid): pid is number => pid !== undefined)
@@ -196,44 +213,58 @@ export default function PresetGroupCard({
               <span className="truncate">
                 {group.title || 'Group'} ({group.items.length})
               </span>
-              <IconButton
-                icon={Pencil}
-                label="Rename group"
-                onClick={handleRenameStart}
-                className="shrink-0 rounded-full p-1 text-green-500 transition hover:bg-green-100 dark:text-green-400 dark:hover:bg-green-900/30"
-                iconClassName="h-3 w-3"
-              />
             </span>
           )}
 
           {!isRenaming && (
-            <div className="flex shrink-0 items-center gap-1">
+            <div ref={menuRef} className="relative shrink-0">
               <IconButton
-                icon={groupFocused ? Eye : EyeOff}
-                label={groupFocused ? 'Send group to tray' : 'Focus group'}
-                onClick={() => toggleGroupFocus(group)}
-                disabled={groupPids.length === 0}
-                className={ICON_BUTTON_TOOLBAR_DISABLED}
-              />
-              <IconButton
-                icon={Download}
-                label="Export group"
-                onClick={handleExportGroup}
-                disabled={group.items.length === 0}
-                className={ICON_BUTTON_TOOLBAR_DISABLED}
-              />
-              <IconButton
-                icon={isFormOpen ? X : Plus}
-                label={isFormOpen ? 'Cancel' : 'Add preset item'}
-                onClick={() => (isFormOpen ? onCloseForm() : handleToggleAddForm())}
+                icon={MoreHorizontal}
+                label="Group actions"
+                onClick={() => setIsMenuOpen((current) => !current)}
                 className={ICON_BUTTON_TOOLBAR}
               />
-              <IconButton
-                icon={Trash2}
-                label="Delete group"
-                onClick={() => deleteGroup(group.id)}
-                className={ICON_BUTTON_TOOLBAR}
-              />
+              {isMenuOpen && (
+                <div className="absolute top-full right-0 z-20 mt-1 flex w-44 flex-col gap-0.5 rounded-lg border border-green-200 bg-white p-1 shadow-lg dark:border-green-800 dark:bg-green-950">
+                  {[
+                    { icon: Pencil, label: 'Rename group', onClick: handleRenameStart },
+                    {
+                      icon: groupFocused ? Eye : EyeOff,
+                      label: groupFocused ? 'Send group to tray' : 'Focus group',
+                      onClick: handleToggleFocus,
+                      disabled: groupPids.length === 0
+                    },
+                    {
+                      icon: Download,
+                      label: 'Export group',
+                      onClick: handleExportGroup,
+                      disabled: group.items.length === 0
+                    },
+                    {
+                      icon: isFormOpen ? X : Plus,
+                      label: isFormOpen ? 'Cancel' : 'Add preset item',
+                      onClick: () => {
+                        setIsMenuOpen(false)
+                        if (isFormOpen) onCloseForm()
+                        else handleToggleAddForm()
+                      }
+                    },
+                    { icon: Trash2, label: 'Delete group', onClick: handleDeleteGroup }
+                  ].map(({ icon: Icon, label, onClick, disabled }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={onClick}
+                      disabled={disabled}
+                      title={label}
+                      className="flex w-full cursor-pointer items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-300 dark:hover:bg-green-900/30"
+                    >
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -245,6 +276,7 @@ export default function PresetGroupCard({
               addItem(group.id, values)
               onCloseForm()
             }}
+            onCancel={onCloseForm}
             wrapperClassName="rounded-lg border border-green-200 dark:border-green-800"
           />
         )}

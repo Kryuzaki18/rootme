@@ -102,6 +102,7 @@ export default function PresetItemRow({
               updateItem(groupId, item.id, values)
               onEditToggle()
             }}
+            onCancel={onEditToggle}
             wrapperClassName="border-t border-green-200 dark:border-green-800"
           />
         )}

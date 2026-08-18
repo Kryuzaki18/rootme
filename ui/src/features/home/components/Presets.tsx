@@ -4,10 +4,11 @@ import { usePresetsStore } from '@/store/presetsStore'
 import { downloadJson } from '@/util'
 import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
 import { PRESET_EXPORT_FILENAME } from '@/constants/preset.constant'
-import { ICON_BUTTON_TOOLBAR, ICON_BUTTON_TOOLBAR_DISABLED } from '@/constants/iconButton.constant'
 import { usePresetFocus } from '@/hooks/usePresetFocus'
-import IconButton from '@/components/IconButton'
 import PresetGroupCard from './PresetGroupCard'
+
+const TOOLBAR_BUTTON =
+  'flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-green-600 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-green-400 dark:hover:bg-green-900/30'
 
 interface ActiveForm {
   groupId: string
@@ -67,15 +68,24 @@ export default function Presets() {
             className="hidden"
             onChange={handleImportChange}
           />
-          <IconButton icon={Upload} label="Import presets" onClick={handleImportClick} className={ICON_BUTTON_TOOLBAR} />
-          <IconButton
-            icon={Download}
-            label="Export presets"
+          <button type="button" onClick={handleImportClick} title="Import presets" className={TOOLBAR_BUTTON}>
+            <Upload className="h-3.5 w-3.5" />
+            Import
+          </button>
+          <button
+            type="button"
             onClick={handleExportAll}
             disabled={groups.length === 0}
-            className={ICON_BUTTON_TOOLBAR_DISABLED}
-          />
-          <IconButton icon={Plus} label="Add preset group" onClick={() => addGroup()} className={ICON_BUTTON_TOOLBAR} />
+            title="Export all presets"
+            className={TOOLBAR_BUTTON}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export All
+          </button>
+          <button type="button" onClick={() => addGroup()} title="Add preset group" className={TOOLBAR_BUTTON}>
+            <Plus className="h-3.5 w-3.5" />
+            Add Group
+          </button>
         </div>
       </div>
 
