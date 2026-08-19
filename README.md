@@ -25,8 +25,10 @@ Search for running processes by name or window title, then manage each matching 
 - **Focus** — restore and bring a window to the foreground.
 - **Show/Minimize** — toggle a window's visibility, or send it to the tray.
 - **Move/Resize** — read and update a window's position and size.
-- **Edit** — rename a window's title and replace its icon live, via direct Win32 calls (`SetWindowText`, `WM_SETICON`).
-- **Presets** — organize saved windows into named groups. Drag a search result into a group (or onto an existing preset to bind its PID) to capture its title, icon, and bounds; focus a single preset or a whole group at once; export/import groups as JSON.
+- **Edit** — rename a window's title and replace its icon (via a native file picker) live, using direct Win32 calls (`SetWindowText`, `WM_SETICON`).
+- **Multi-select** — select individual results or all of them at once, then drag the whole selection into a preset group in one drop.
+- **Presets** — organize saved windows into named groups. Drag a search result into a group (or onto an existing preset to bind its PID) to capture its title, icon, and bounds; focus a single preset or a whole group at once; export/import a single group or all groups as JSON.
+- **Tray** — closing the window minimizes RootMe to the system tray instead of quitting; reopen or force-quit from the tray menu or the header's Force Close button.
 
 Window edits (title, icon, position, size, visibility) apply only to the live running window for the current session and don't survive the target app restarting. Presets, recent searches, and the theme choice are saved locally in the app's storage and persist across restarts.
 
@@ -62,15 +64,16 @@ npm run dev
 
 ```
 src/
-  main/            Electron main process (window management, process listing)
+  main/            Electron main process (window management, process listing, tray)
   preload/         Context bridge exposing the IPC API to the renderer
 ui/
   src/
-    components/    Shared UI components (icon button, drag ghost)
+    components/    Shared UI components (icon button, drag ghost/preview, confirm dialog, toast viewport)
     features/
-      commons/     App shell (header, theme toggle)
+      commons/     App shell (header, theme toggle, force close)
       home/        Search, results list, and presets panel
-    store/         Zustand stores (app instances, presets)
-    constants/     Storage keys and shared UI/drag constants
+    hooks/         Drag/drop, clipboard, window-bounds draft, and preset-focus hooks
+    store/         Zustand stores (app instances, presets, toasts)
+    constants/     Storage keys and shared UI/drag/preset constants
     types/         Renderer-side type declarations
 ```
