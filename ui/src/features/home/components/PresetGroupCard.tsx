@@ -15,10 +15,12 @@ import {
   X
 } from 'lucide-react'
 import { usePresetsStore, type PresetGroup, type PresetItem } from '@/store/presetsStore'
+import { useAppInstancesStore } from '@/store/appInstancesStore'
+import { useToastStore } from '@/store/toastStore'
 import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
 import { PRESET_GROUP_EXPORT_FILENAME_PREFIX } from '@/constants/preset.constant'
 import { ICON_BUTTON_TOOLBAR } from '@/constants/iconButton.constant'
-import type { DraggedAppInstancePayload, DraggedPresetGroupPayload } from '@/types/drag'
+import type { DraggedAppInstanceEntry, DraggedAppInstancePayload, DraggedPresetGroupPayload } from '@/types/drag'
 import { downloadJson } from '@/util'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { useDragSource } from '@/hooks/useDragSource'
@@ -54,7 +56,9 @@ export default function PresetGroupCard({
   isGroupFocused,
   toggleGroupFocus
 }: PresetGroupCardProps) {
-  const { deleteGroup, renameGroup, addItem, reorderGroups } = usePresetsStore()
+  const { deleteGroup, renameGroup, addItem, updateItemPid, reorderGroups } = usePresetsStore()
+  const { saveEdit, clearInstanceSelection } = useAppInstancesStore()
+  const { showToast } = useToastStore()
   const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed)
   const [isRenaming, setIsRenaming] = useState(false)
   const [renameDraft, setRenameDraft] = useState(group.title)
@@ -68,11 +72,32 @@ export default function PresetGroupCard({
   const isPidTaken = (pid: number, excludeItemId?: string) =>
     group.items.some((item) => item.id !== excludeItemId && item.pid === pid)
 
-  const {
-    isDragOver: isAppInstanceDragOver,
-    dropHandlers: appInstanceDropHandlers,
-    close: closeDragOver
-  } = useDropTarget<DraggedAppInstancePayload>(DRAG_MIME_TYPES.APP_INSTANCE, async (instance) => {
+  // Multiple selected instances fill the group's existing preset item slots in order
+  // (first item first), so a group needs at least as many items as instances selected.
+  // Dropping a single instance keeps the old behavior of creating a new item for it.
+  const handleInstanceDrop = async (instances: DraggedAppInstanceEntry[]) => {
+    if (instances.length > 1) {
+      if (group.items.length < instances.length) {
+        showToast(
+          `"${group.title || 'Group'}" has ${group.items.length} preset item${
+            group.items.length === 1 ? '' : 's'
+          }, but ${instances.length} instances are selected. Select fewer instances or add more preset items to this group.`,
+          'error'
+        )
+        return
+      }
+
+      instances.forEach((instance, index) => {
+        const item = group.items[index]
+        updateItemPid(group.id, item.id, instance.pid)
+        saveEdit(instance.pid, item.title, item.iconDataUrl)
+        window.api.setWindowBounds(instance.pid, item.x, item.y, item.width, item.height)
+      })
+      clearInstanceSelection()
+      return
+    }
+
+    const [instance] = instances
     const bounds = await window.api.getWindowBounds(instance.pid)
     addItem(group.id, {
       title: instance.title,
@@ -83,7 +108,16 @@ export default function PresetGroupCard({
       y: bounds?.y ?? 0,
       pid: isPidTaken(instance.pid) ? undefined : instance.pid
     })
-  })
+    clearInstanceSelection()
+  }
+
+  const {
+    isDragOver: isAppInstanceDragOver,
+    dropHandlers: appInstanceDropHandlers,
+    close: closeDragOver
+  } = useDropTarget<DraggedAppInstancePayload>(DRAG_MIME_TYPES.APP_INSTANCE, (payload) =>
+    handleInstanceDrop(payload.instances)
+  )
 
   const { isDragging, dragHandlers } = useDragSource(
     DRAG_MIME_TYPES.PRESET_GROUP,
@@ -311,6 +345,7 @@ export default function PresetGroupCard({
                 onEditToggle={() => (editingItemId === item.id ? onCloseForm() : onEditStart(group.id, item.id))}
                 onDropSettled={closeDragOver}
                 onToggleFocus={() => toggleItemFocus(item)}
+                onInstanceDrop={handleInstanceDrop}
               />
             ))}
           </div>

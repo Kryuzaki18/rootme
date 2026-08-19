@@ -26,6 +26,7 @@ interface AppInstancesState {
   isLoading: boolean
   hasSearched: boolean
   recentSearches: RecentSearchEntry[]
+  selectedPids: number[]
   verify: (title: string) => Promise<void>
   clearSearch: () => void
   clearRecentSearches: () => void
@@ -34,6 +35,9 @@ interface AppInstancesState {
   focusInstance: (pid: number) => Promise<void>
   toggleEdit: (pid: number) => void
   saveEdit: (pid: number, displayName: string, iconDataUrl?: string) => Promise<void>
+  toggleInstanceSelection: (pid: number) => void
+  selectAllInstances: () => void
+  clearInstanceSelection: () => void
 }
 
 function loadRecentSearches(): RecentSearchEntry[] {
@@ -81,9 +85,10 @@ export const useAppInstancesStore = create<AppInstancesState>((set, get) => ({
   isLoading: false,
   hasSearched: false,
   recentSearches: loadRecentSearches(),
+  selectedPids: [],
 
   verify: async (title) => {
-    set({ isLoading: true, hasSearched: true })
+    set({ isLoading: true, hasSearched: true, selectedPids: [] })
 
     const processes = await window.api.verifyProcesses(title)
 
@@ -106,7 +111,7 @@ export const useAppInstancesStore = create<AppInstancesState>((set, get) => ({
   },
 
   clearSearch: () => {
-    set({ instances: [], isLoading: false, hasSearched: false })
+    set({ instances: [], isLoading: false, hasSearched: false, selectedPids: [] })
   },
 
   clearRecentSearches: () => {
@@ -176,5 +181,20 @@ export const useAppInstancesStore = create<AppInstancesState>((set, get) => ({
           : item
       )
     })
+  },
+
+  toggleInstanceSelection: (pid) => {
+    const current = get().selectedPids
+    set({
+      selectedPids: current.includes(pid) ? current.filter((value) => value !== pid) : [...current, pid]
+    })
+  },
+
+  selectAllInstances: () => {
+    set({ selectedPids: get().instances.map((instance) => instance.pid) })
+  },
+
+  clearInstanceSelection: () => {
+    set({ selectedPids: [] })
   }
 }))

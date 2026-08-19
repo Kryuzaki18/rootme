@@ -16,10 +16,13 @@ export default function Home() {
     isLoading,
     hasSearched,
     recentSearches,
+    selectedPids,
     verify,
     clearSearch,
     clearRecentSearches,
-    removeRecentSearch
+    removeRecentSearch,
+    selectAllInstances,
+    clearInstanceSelection
   } = useAppInstancesStore()
 
   const handleVerify = (term: string = title) => {
@@ -88,10 +91,29 @@ export default function Home() {
 
         {hasSearched && !isLoading && (
           <div className="flex shrink-0 items-center justify-between gap-3">
-            <span className="flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400">
-              <MoveLeft className="h-3 w-3 shrink-0" />
-              Drag an item to Presets to save it
-            </span>
+            <div className="flex items-center gap-3">
+              {instances.length > 0 && (
+                <label className="flex cursor-pointer items-center gap-1.5 text-[10px] text-zinc-500 dark:text-zinc-400">
+                  <input
+                    type="checkbox"
+                    checked={selectedPids.length > 0 && selectedPids.length === instances.length}
+                    ref={(element) => {
+                      if (element) element.indeterminate = selectedPids.length > 0 && selectedPids.length < instances.length
+                    }}
+                    onChange={() =>
+                      selectedPids.length === instances.length ? clearInstanceSelection() : selectAllInstances()
+                    }
+                    className="h-3.5 w-3.5 cursor-pointer rounded border-zinc-300 text-red-600 focus:ring-2 focus:ring-red-200 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-red-900/50"
+                  />
+                  {selectedPids.length > 0 ? `${selectedPids.length} selected` : 'Select all'}
+                </label>
+              )}
+
+              <span className="flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400">
+                <MoveLeft className="h-3 w-3 shrink-0" />
+                Drag an item to Presets to save it
+              </span>
+            </div>
 
             <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
               {instances.length} {instances.length === 1 ? 'result' : 'results'} found

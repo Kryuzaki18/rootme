@@ -18,8 +18,10 @@ import IconPickerField from './IconPickerField'
 import WindowBoundsFields from './WindowBoundsFields'
 
 export default function AppInstanceRow({ instance }: { instance: AppInstance }) {
-  const { toggleVisibility, focusInstance, toggleEdit, saveEdit } = useAppInstancesStore()
+  const { instances, toggleVisibility, focusInstance, toggleEdit, saveEdit, selectedPids, toggleInstanceSelection } =
+    useAppInstancesStore()
   const { groups, updateItemPid } = usePresetsStore()
+  const isSelected = selectedPids.includes(instance.pid)
   const [nameDraft, setNameDraft] = useState(instance.displayName)
   const [iconDraft, setIconDraft] = useState<string | undefined>(instance.iconDataUrl)
   const boundsDraft = useWindowBoundsDraft()
@@ -63,11 +65,20 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
     updateItemPid(preset.groupId, preset.id, instance.pid)
   })
 
-  const { isDragging, dragHandlers } = useDragSource(DRAG_MIME_TYPES.APP_INSTANCE, () => ({
-    pid: instance.pid,
-    title: instance.windowTitle || instance.displayName,
-    iconDataUrl: instance.iconDataUrl
-  }))
+  const { isDragging, dragHandlers } = useDragSource(DRAG_MIME_TYPES.APP_INSTANCE, () => {
+    const source =
+      isSelected && selectedPids.length > 1
+        ? instances.filter((candidate) => selectedPids.includes(candidate.pid))
+        : [instance]
+
+    return {
+      instances: source.map((entry) => ({
+        pid: entry.pid,
+        title: entry.windowTitle || entry.displayName,
+        iconDataUrl: entry.iconDataUrl
+      }))
+    }
+  })
 
   return (
     <>
@@ -79,10 +90,21 @@ export default function AppInstanceRow({ instance }: { instance: AppInstance }) 
         } ${
           isDragOver
             ? 'border-dashed border-red-500 ring-2 ring-red-300 dark:border-red-400 dark:ring-red-700'
-            : 'border-zinc-200 dark:border-zinc-800'
+            : isSelected
+              ? 'border-red-300 ring-1 ring-red-200 dark:border-red-800 dark:ring-red-900/50'
+              : 'border-zinc-200 dark:border-zinc-800'
         }`}
       >
         <div className="flex items-center gap-10 px-4 py-3">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => toggleInstanceSelection(instance.pid)}
+            onClick={(event) => event.stopPropagation()}
+            aria-label={`Select ${instance.windowTitle || instance.displayName}`}
+            className="h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-zinc-300 text-red-600 focus:ring-2 focus:ring-red-200 dark:border-zinc-600 dark:bg-zinc-800 dark:focus:ring-red-900/50"
+          />
+
           <div className="flex flex-col gap-1">
             <span className="flex items-center gap-1 font-mono text-[9px] text-zinc-400 dark:text-zinc-500">
               PID {instance.pid}

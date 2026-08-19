@@ -4,7 +4,7 @@ import { usePresetsStore, type PresetItem } from '@/store/presetsStore'
 import { useAppInstancesStore } from '@/store/appInstancesStore'
 import { DRAG_MIME_TYPES } from '@/constants/drag.constant'
 import { ICON_BUTTON_ROW } from '@/constants/iconButton.constant'
-import type { DraggedAppInstancePayload, DraggedPresetItemPayload } from '@/types/drag'
+import type { DraggedAppInstanceEntry, DraggedAppInstancePayload, DraggedPresetItemPayload } from '@/types/drag'
 import { useDragSource } from '@/hooks/useDragSource'
 import { useDropTarget } from '@/hooks/useDropTarget'
 import IconButton from '@/components/IconButton'
@@ -22,6 +22,7 @@ interface PresetItemRowProps {
   onEditToggle: () => void
   onDropSettled: () => void
   onToggleFocus: () => void
+  onInstanceDrop: (instances: DraggedAppInstanceEntry[]) => void
 }
 
 export default function PresetItemRow({
@@ -32,7 +33,8 @@ export default function PresetItemRow({
   isPidTaken,
   onEditToggle,
   onDropSettled,
-  onToggleFocus
+  onToggleFocus,
+  onInstanceDrop
 }: PresetItemRowProps) {
   const { updateItem, updateItemPid, deleteItem, reorderItems } = usePresetsStore()
   const { saveEdit } = useAppInstancesStore()
@@ -48,8 +50,15 @@ export default function PresetItemRow({
     dropHandlers: appInstanceDropHandlers
   } = useDropTarget<DraggedAppInstancePayload>(
     DRAG_MIME_TYPES.APP_INSTANCE,
-    (instance) => {
+    (payload) => {
       onDropSettled()
+
+      if (payload.instances.length > 1) {
+        onInstanceDrop(payload.instances)
+        return
+      }
+
+      const [instance] = payload.instances
       if (isPidTaken(instance.pid, item.id)) return
 
       updateItemPid(groupId, item.id, instance.pid)
