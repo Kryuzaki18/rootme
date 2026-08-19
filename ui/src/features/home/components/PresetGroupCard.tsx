@@ -190,11 +190,11 @@ export default function PresetGroupCard({
     <>
       <div
         {...dropHandlers}
-        className={`flex shrink-0 scale-100 flex-col gap-2 rounded-lg border p-3 mt-0.5 transition-all duration-150 ease-out dark:bg-zinc-900/20 ${
+        className={`flex shrink-0 flex-col gap-2 rounded-lg border p-3 mt-0.5 transition-all duration-150 ease-out dark:bg-zinc-900/20 ${
           isDragging ? 'opacity-40' : ''
         } ${
           isGroupDragOver
-            ? 'scale-[1.015] border-dashed border-red-500 bg-red-50 shadow-lg shadow-red-500/10 ring-2 ring-red-300 dark:border-red-400 dark:bg-red-950/30 dark:ring-red-700'
+            ? 'border-dashed border-red-500 bg-red-50 shadow-lg shadow-red-500/10 ring-2 ring-red-300 dark:border-red-400 dark:bg-red-950/30 dark:ring-red-700'
             : isAppInstanceDragOver
               ? 'border-dashed border-red-500 ring-2 ring-red-300 dark:border-red-400 dark:ring-red-700'
               : 'border-zinc-200 dark:border-zinc-800'
